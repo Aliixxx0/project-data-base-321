@@ -1,15 +1,15 @@
 CREATE TABLE Train
 (
   Train_ID INT NOT NULL,
-  Arabic_Name INT NOT NULL,
-  English_Name INT NOT NULL,
+  Arabic_Name VARCHAR(40) NOT NULL,
+  English_Name VARCHAR(40) NOT NULL,
   PRIMARY KEY (Train_ID)
 );
 
 CREATE TABLE Station
 (
   Station_ID INT NOT NULL,
-  Station_Name INT NOT NULL,
+  Station_Name VARCHAR(40) NOT NULL,
   City VARCHAR(30) NOT NULL,
   PRIMARY KEY (Station_ID)
 );
@@ -20,7 +20,7 @@ CREATE TABLE Passenger
   Phone VARCHAR(10) NOT NULL,
   Fname VARCHAR(40) NOT NULL,
   Lname VARCHAR(40) NOT NULL,
-  DOB INT NOT NULL,
+  DOB DATE NOT NULL,
   PRIMARY KEY (National_ID)
 );
 
@@ -31,8 +31,8 @@ CREATE TABLE Trip
   TripNo INT NOT NULL,
   Miles INT NOT NULL,
   Cost INT NOT NULL,
-  Departing_Time INT NOT NULL,
-  Arrival_Time INT NOT NULL,
+  Departing_Time TIME NOT NULL,
+  Arrival_Time TIME NOT NULL,
   Train_ID INT NOT NULL,
   Departing_Station INT NOT NULL,
   Arrival_Station INT NOT NULL,
@@ -44,7 +44,7 @@ CREATE TABLE Trip
 
 CREATE TABLE ESystem
 (
-  System_Name INT NOT NULL,
+  System_Name VARCHAR(50) NOT NULL,
   SysID VARCHAR(2) NOT NULL,
   PRIMARY KEY (SysID)
 );
@@ -81,7 +81,7 @@ CREATE TABLE Notification
 (
   Notification_ID INT NOT NULL,
   Type VARCHAR(1) NOT NULL,
-  NDate INT NOT NULL,
+  NDate DATE NOT NULL,
   SysID VARCHAR(2) NOT NULL,
   PRIMARY KEY (Notification_ID),
   FOREIGN KEY (SysID) REFERENCES ESystem(SysID)
@@ -103,8 +103,8 @@ CREATE TABLE Reservation
 
 CREATE TABLE Dependent
 (
-  Name INT NOT NULL,
-  Relationship INT NOT NULL,
+  Name VARCHAR(50) NOT NULL,
+  Relationship VARCHAR(50) NOT NULL,
   Guardian_ID INT NOT NULL,
   FOREIGN KEY (Guardian_ID) REFERENCES Passenger(National_ID)
 );
@@ -112,7 +112,7 @@ CREATE TABLE Dependent
 CREATE TABLE Seat
 (
   Number INT NOT NULL,
-  Class INT NOT NULL,
+  Class VARCHAR(1) NOT NULL,
   Reservation_ID INT NOT NULL,
   TripNo INT NOT NULL,
   FOREIGN KEY (Reservation_ID) REFERENCES Reservation(Reservation_ID),
