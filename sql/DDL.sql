@@ -1,16 +1,16 @@
 CREATE TABLE Train
 (
   Train_ID INT NOT NULL,
-  Arabic_Name VARCHAR(50) NOT NULL,
-  English_Name VARCHAR(50) NOT NULL,
+  Arabic_Name VARCHAR(35) NOT NULL,
+  English_Name VARCHAR(35) NOT NULL,
   PRIMARY KEY (Train_ID)
 );
 
 CREATE TABLE Station
 (
   Station_ID INT NOT NULL,
-  Station_Name VARCHAR(50) NOT NULL,
-  City VARCHAR(50) NOT NULL,
+  Station_Name VARCHAR(35) NOT NULL,
+  City VARCHAR(30) NOT NULL,
   PRIMARY KEY (Station_ID)
 );
 
@@ -30,7 +30,7 @@ CREATE TABLE Trip
   Duration INT NOT NULL,
   TripNo INT NOT NULL,
   Miles INT NOT NULL,
-  Cost INT NOT NULL,
+  Cost FLOAT NOT NULL,
   Departing_Time TIME NOT NULL,
   Arrival_Time TIME NOT NULL,
   Train_ID INT NOT NULL,
@@ -44,7 +44,7 @@ CREATE TABLE Trip
 
 CREATE TABLE ESystem
 (
-  System_Name VARCHAR(50) NOT NULL,
+  System_Name VARCHAR(30) NOT NULL,
   SysID VARCHAR(2) NOT NULL,
   PRIMARY KEY (SysID)
 );
@@ -70,18 +70,27 @@ CREATE TABLE Staff
 
 CREATE TABLE AssignedStaff
 (
+  Assiging_Date DATE NOT NULL,
   Train_ID INT NOT NULL,
   National_ID INT NOT NULL,
-  Assiging_Date DATE NOT NULL,
   FOREIGN KEY (Train_ID) REFERENCES Train(Train_ID),
   FOREIGN KEY (National_ID) REFERENCES Staff(National_ID)
+);
+
+CREATE TABLE Sequence
+(
+  SequenceNo INT NOT NULL,
+  Train_ID INT NOT NULL,
+  TripNo INT NOT NULL,
+  FOREIGN KEY (Train_ID) REFERENCES Train(Train_ID),
+  FOREIGN KEY (TripNo) REFERENCES Trip(TripNo)
 );
 
 CREATE TABLE Notification
 (
   Notification_ID INT NOT NULL,
   Type VARCHAR(1) NOT NULL,
-  NDate DATE NOT NULL,
+  NDate INT NOT NULL,
   SysID VARCHAR(2) NOT NULL,
   PRIMARY KEY (Notification_ID),
   FOREIGN KEY (SysID) REFERENCES ESystem(SysID)
@@ -91,8 +100,8 @@ CREATE TABLE Reservation
 (
   Reservation_ID INT NOT NULL,
   Reserve_Date DATE NOT NULL,
-  Cost INT NOT NULL,
-  ID_Documents VARCHAR(30),
+  Total_Cost FLOAT NOT NULL,
+  ID_Documents BLOB NOT NULL,
   RStatus VARCHAR(1) NOT NULL,
   TripNo INT NOT NULL,
   Managed_By INT NOT NULL,
@@ -103,8 +112,8 @@ CREATE TABLE Reservation
 
 CREATE TABLE Dependent
 (
-  Name VARCHAR(50) NOT NULL,
-  Relationship VARCHAR(50) NOT NULL,
+  Name INT NOT NULL,
+  Relationship INT NOT NULL,
   Guardian_ID INT NOT NULL,
   FOREIGN KEY (Guardian_ID) REFERENCES Passenger(National_ID)
 );
@@ -112,7 +121,7 @@ CREATE TABLE Dependent
 CREATE TABLE Seat
 (
   Number INT NOT NULL,
-  Class VARCHAR(1) NOT NULL,
+  Class INT NOT NULL,
   Reservation_ID INT NOT NULL,
   TripNo INT NOT NULL,
   FOREIGN KEY (Reservation_ID) REFERENCES Reservation(Reservation_ID),
@@ -130,8 +139,9 @@ CREATE TABLE Canceled_Reservation
 
 CREATE TABLE Under_processing_Reservation
 (
-  Expire_Date DATE NOT NULL,
   Reservation_ID INT NOT NULL,
+  Expire_Date DATE NOT NULL,
+  Expire_Time TIME NOT NULL,
   PRIMARY KEY (Reservation_ID),
   FOREIGN KEY (Reservation_ID) REFERENCES Reservation(Reservation_ID)
 );
