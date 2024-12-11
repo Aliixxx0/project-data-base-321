@@ -20,15 +20,22 @@ const db = mysql.createConnection({
 });
 
 // Query
-app.get("/trip_list", (req, res) => {
-  const query = `SELECT * FROM Trip;`;
+app.get("/trips", (req, res) => {
+  const { date } = req.query; // Get the date from the query parameters
+  if (!date) {
+    return res.status(400).send({ error: "Date is required" });
+  }
 
-  db.query(query, (err, results) => {
+  const query = `SELECT * FROM Trip WHERE DATE = ?;`;
+
+  db.query(query, [date], (err, results) => {
     if (err) {
       console.error("Error fetching train schedule:", err);
-      res.status(500).send({ error: "Error fetching train schedule" });
+      res.status(500).send({ error: "Error fetching schedule" });
+    } else if (results.length === 0) {
+      res.json([]); // Send an empty array if no results are found
     } else {
-      res.json(results); // Send results as JSON
+      res.json(results); // Send the query results as JSON
     }
   });
 });
