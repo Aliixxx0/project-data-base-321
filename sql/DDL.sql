@@ -95,8 +95,10 @@ CREATE TABLE Reservation
   ID_Documents BLOB NOT NULL,
   RStatus VARCHAR(1) NOT NULL,
   TripNo INT NOT NULL,
+  Managed_By INT NOT NULL,
   PRIMARY KEY (Reservation_ID),
-  FOREIGN KEY (TripNo) REFERENCES Trip(TripNo)
+  FOREIGN KEY (TripNo) REFERENCES Trip(TripNo),
+  FOREIGN KEY (Managed_By) REFERENCES Staff(National_ID)
 );
 
 CREATE TABLE Dependent
@@ -122,10 +124,8 @@ CREATE TABLE Canceled_Reservation
 (
   Request_Date DATE NOT NULL,
   Reservation_ID INT NOT NULL,
-  Canceled_By INT NOT NULL,
   PRIMARY KEY (Reservation_ID),
-  FOREIGN KEY (Reservation_ID) REFERENCES Reservation(Reservation_ID),
-  FOREIGN KEY (Canceled_By) REFERENCES Staff(National_ID)
+  FOREIGN KEY (Reservation_ID) REFERENCES Reservation(Reservation_ID)
 );
 
 CREATE TABLE Under_processing_Reservation
