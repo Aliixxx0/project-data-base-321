@@ -1,5 +1,6 @@
 import React from "react";
 import "./App.css";
+import TrainSchedule from "./TrainSchedule"; // Import the TrainSchedule component
 
 function App() {
   return (
@@ -89,6 +90,9 @@ function App() {
             </li>
           </ul>
         </section>
+
+        {/* Train Schedule */}
+        <TrainSchedule /> {/* Adding the TrainSchedule component */}
       </main>
 
       {/* Footer */}
