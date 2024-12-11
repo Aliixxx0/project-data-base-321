@@ -4,7 +4,7 @@ const cors = require("cors");
 const bodyParser = require("body-parser");
 
 const app = express();
-const port = 5000;
+const Lport = 5000;
 
 // Middleware
 app.use(cors());
@@ -13,9 +13,28 @@ app.use(bodyParser.json());
 // MySQL Connection Setup
 const db = mysql.createConnection({
   host: "localhost",
-  user: "root", // Your MySQL username
-  password: "", // Your MySQL password
-  database: "railways_db" // Your database name
+  user: "user",
+  password: "",
+  database: "ics321",
+  port: 3306, // Explicitly specify the port
+});
+
+// Query
+app.get("/train_schedule", (req, res) => {
+  const query = `
+    SELECT Train_ID, English_Name, Departure_Time, Arrival_Time 
+    FROM Train 
+    JOIN Trip ON Train.Train_ID = Trip.Train_ID
+  `;
+
+  db.query(query, (err, results) => {
+    if (err) {
+      console.error("Error fetching train schedule:", err);
+      res.status(500).send({ error: "Error fetching train schedule" });
+    } else {
+      res.json(results); // Send results as JSON
+    }
+  });
 });
 
 // Connect to MySQL with Retry Logic
@@ -49,6 +68,6 @@ app.use((req, res) => {
 });
 
 // Start Server
-app.listen(port, () => {
-  console.log(`Server is running on http://localhost:${port}`);
+app.listen(Lport, () => {
+  console.log(`Server is running on http://localhost:${Lport}`);
 });
