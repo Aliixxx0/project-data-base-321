@@ -1,6 +1,6 @@
 import React from "react";
 import "./App.css";
-import TrainSchedule from "./TrainSchedule"; // Import the TrainSchedule component
+import TripsnSchedule from "./TripsSchedule.js"; // Import the TrainSchedule component
 
 function App() {
   return (
@@ -20,7 +20,7 @@ function App() {
 
       {/* Main Content */}
       <main className="container">
-        {/* Search Trains */}
+        {/* Search Trains Section */}
         <section id="search-trains" className="card">
           <h2>Search Trains</h2>
           <form action="search_trains.php" method="GET">
@@ -47,7 +47,7 @@ function App() {
           </form>
         </section>
 
-        {/* Book Tickets */}
+        {/* Book Tickets Section */}
         <section id="book-ticket" className="card">
           <h2>Book Tickets</h2>
           <form action="book_ticket.php" method="POST">
@@ -64,7 +64,7 @@ function App() {
           </form>
         </section>
 
-        {/* Manage Reservations */}
+        {/* Manage Reservations Section */}
         <section id="manage-reservations" className="card">
           <h2>Manage Reservations</h2>
           <form action="manage_reservations.php" method="POST">
@@ -75,7 +75,7 @@ function App() {
           </form>
         </section>
 
-        {/* Reports */}
+        {/* Reports Section */}
         <section id="reports" className="card">
           <h2>Reports</h2>
           <ul>
@@ -91,8 +91,8 @@ function App() {
           </ul>
         </section>
 
-        {/* Train Schedule */}
-        <TrainSchedule /> {/* Adding the TrainSchedule component */}
+        {/* Train Schedule Section */}
+        <TripsnSchedule /> {/* Add the TrainSchedule component */}
       </main>
 
       {/* Footer */}

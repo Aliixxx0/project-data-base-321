@@ -1,16 +1,16 @@
 CREATE TABLE Train
 (
   Train_ID INT NOT NULL,
-  Arabic_Name VARCHAR(40) NOT NULL,
-  English_Name VARCHAR(40) NOT NULL,
+  Arabic_Name VARCHAR(50) NOT NULL,
+  English_Name VARCHAR(50) NOT NULL,
   PRIMARY KEY (Train_ID)
 );
 
 CREATE TABLE Station
 (
   Station_ID INT NOT NULL,
-  Station_Name VARCHAR(40) NOT NULL,
-  City VARCHAR(30) NOT NULL,
+  Station_Name VARCHAR(50) NOT NULL,
+  City VARCHAR(50) NOT NULL,
   PRIMARY KEY (Station_ID)
 );
 
@@ -70,9 +70,9 @@ CREATE TABLE Staff
 
 CREATE TABLE AssignedStaff
 (
-  Assiging_Date DATE NOT NULL,
   Train_ID INT NOT NULL,
   National_ID INT NOT NULL,
+  Assiging_Date DATE NOT NULL,
   FOREIGN KEY (Train_ID) REFERENCES Train(Train_ID),
   FOREIGN KEY (National_ID) REFERENCES Staff(National_ID)
 );
@@ -92,7 +92,7 @@ CREATE TABLE Reservation
   Reservation_ID INT NOT NULL,
   Reserve_Date DATE NOT NULL,
   Cost INT NOT NULL,
-  ID_Documents BLOB NOT NULL,
+  ID_Documents VARCHAR(30),
   RStatus VARCHAR(1) NOT NULL,
   TripNo INT NOT NULL,
   Managed_By INT NOT NULL,

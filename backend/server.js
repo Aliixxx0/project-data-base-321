@@ -20,12 +20,8 @@ const db = mysql.createConnection({
 });
 
 // Query
-app.get("/train_schedule", (req, res) => {
-  const query = `
-    SELECT Train_ID, English_Name, Departure_Time, Arrival_Time 
-    FROM Train 
-    JOIN Trip ON Train.Train_ID = Trip.Train_ID
-  `;
+app.get("/trip_list", (req, res) => {
+  const query = `SELECT * FROM Trip;`;
 
   db.query(query, (err, results) => {
     if (err) {
