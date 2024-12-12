@@ -1,54 +1,78 @@
-const express = require("express");
-const mysql = require("mysql");
-const cors = require("cors");
-const bodyParser = require("body-parser");
+const express = require('express');
+const mysql = require('mysql2');
+const bodyParser = require('body-parser');
 
 const app = express();
-const port = 5000;
-
-// Middleware
-app.use(cors());
 app.use(bodyParser.json());
 
-// MySQL Connection Setup
+// Database connection
 const db = mysql.createConnection({
-  host: "localhost",
-  user: "root", // Your MySQL username
-  password: "", // Your MySQL password
-  database: "railways_db" // Your database name
+  host: 'localhost',
+  user: 'root',
+  password: 'password', // Replace with your MySQL password
+  database: 'train_reservation_system',
 });
 
-// Connect to MySQL with Retry Logic
-const connectWithRetry = () => {
-  db.connect((err) => {
-    if (err) {
-      console.error("Database connection failed. Retrying in 5 seconds...", err);
-      setTimeout(connectWithRetry, 5000); // Retry connection after 5 seconds
-    } else {
-      console.log("Connected to MySQL database!");
-    }
-  });
-};
-connectWithRetry();
+db.connect((err) => {
+  if (err) throw err;
+  console.log('Database Connected');
+});
 
-// API Endpoint to Fetch All Trains
-app.get("/api/trains", (req, res) => {
-  const sqlQuery = "SELECT * FROM trains";
-  db.query(sqlQuery, (err, results) => {
-    if (err) {
-      console.error("Error fetching data:", err.message);
-      return res.status(500).json({ error: "Error fetching train data" });
-    }
-    res.status(200).json(results);
+// Routes
+// Search for Trains
+app.get('/api/trains/search', (req, res) => {
+  const { name } = req.query;
+  db.query('SELECT * FROM Trains WHERE name LIKE ?', [`%${name}%`], (err, results) => {
+    if (err) throw err;
+    res.json(results);
   });
 });
 
-// Handle Unknown Routes
-app.use((req, res) => {
-  res.status(404).json({ error: "Route not found" });
+// Book Seat
+app.post('/api/reservations/book', (req, res) => {
+  const { user_id, train_id, seat_number } = req.body;
+  db.query(
+    'INSERT INTO Reservations (user_id, train_id, seat_number, payment_status) VALUES (?, ?, ?, "completed")',
+    [user_id, train_id, seat_number],
+    (err, result) => {
+      if (err) return res.status(500).send(err);
+      db.query('UPDATE Trains SET seats_available = seats_available - 1 WHERE train_id = ?', [train_id]);
+      res.send({ message: 'Reservation successful', reservationId: result.insertId });
+    }
+  );
 });
 
-// Start Server
-app.listen(port, () => {
-  console.log(`Server is running on http://localhost:${port}`);
+// Promote Waitlist
+app.post('/api/waitlist/promote', (req, res) => {
+  const { user_id, train_id } = req.body;
+  db.query('UPDATE Waitlist SET status = "promoted" WHERE user_id = ? AND train_id = ?', [user_id, train_id], (err) => {
+    if (err) return res.status(500).send(err);
+    res.send({ message: 'Waitlisted passenger promoted' });
+  });
+});
+
+// Active Trains Report
+app.get('/api/trains/active', (req, res) => {
+  db.query('SELECT * FROM Trains WHERE active = TRUE', (err, results) => {
+    if (err) throw err;
+    res.json(results);
+  });
+});
+
+// Average Load Factor
+app.get('/api/reports/load-factor', (req, res) => {
+  const { date } = req.query;
+  db.query(
+    'SELECT name, (total_seats - seats_available) / total_seats * 100 AS load_factor FROM Trains',
+    (err, results) => {
+      if (err) return res.status(500).send(err);
+      res.json(results);
+    }
+  );
+});
+
+// Server
+const PORT = 5000;
+app.listen(PORT, () => {
+  console.log(`Server running on http://localhost:${PORT}`);
 });

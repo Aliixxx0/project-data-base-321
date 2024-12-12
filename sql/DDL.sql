@@ -1,3 +1,4 @@
+-- Train Table
 CREATE TABLE Train
 (
   Train_ID INT NOT NULL,
@@ -6,6 +7,7 @@ CREATE TABLE Train
   PRIMARY KEY (Train_ID)
 );
 
+-- Station Table
 CREATE TABLE Station
 (
   Station_ID INT NOT NULL,
@@ -14,6 +16,7 @@ CREATE TABLE Station
   PRIMARY KEY (Station_ID)
 );
 
+-- Passenger Table
 CREATE TABLE Passenger
 (
   National_ID INT NOT NULL,
@@ -24,6 +27,7 @@ CREATE TABLE Passenger
   PRIMARY KEY (National_ID)
 );
 
+-- Trip Table (for storing details of each train trip)
 CREATE TABLE Trip
 (
   TDate DATE NOT NULL,
@@ -42,6 +46,7 @@ CREATE TABLE Trip
   FOREIGN KEY (Arrival_Station) REFERENCES Station(Station_ID)
 );
 
+-- System Table (ESystem)
 CREATE TABLE ESystem
 (
   System_Name VARCHAR(50) NOT NULL,
@@ -49,6 +54,7 @@ CREATE TABLE ESystem
   PRIMARY KEY (SysID)
 );
 
+-- Luggage Table
 CREATE TABLE Luggage
 (
   Weight INT NOT NULL,
@@ -58,6 +64,7 @@ CREATE TABLE Luggage
   PRIMARY KEY (Luggage_ID)
 );
 
+-- Staff Table
 CREATE TABLE Staff
 (
   National_ID INT NOT NULL,
@@ -68,6 +75,7 @@ CREATE TABLE Staff
   PRIMARY KEY (National_ID)
 );
 
+-- Assigned Staff (Staff assigned to a Train)
 CREATE TABLE AssignedStaff
 (
   Assiging_Date DATE NOT NULL,
@@ -77,6 +85,7 @@ CREATE TABLE AssignedStaff
   FOREIGN KEY (National_ID) REFERENCES Staff(National_ID)
 );
 
+-- Notification Table (System notifications)
 CREATE TABLE Notification
 (
   Notification_ID INT NOT NULL,
@@ -87,6 +96,7 @@ CREATE TABLE Notification
   FOREIGN KEY (SysID) REFERENCES ESystem(SysID)
 );
 
+-- Reservation Table (for passengers reserving tickets)
 CREATE TABLE Reservation
 (
   Reservation_ID INT NOT NULL,
@@ -101,6 +111,7 @@ CREATE TABLE Reservation
   FOREIGN KEY (Managed_By) REFERENCES Staff(National_ID)
 );
 
+-- Dependent Table (Passengers traveling with dependents)
 CREATE TABLE Dependent
 (
   Name VARCHAR(50) NOT NULL,
@@ -109,6 +120,7 @@ CREATE TABLE Dependent
   FOREIGN KEY (Guardian_ID) REFERENCES Passenger(National_ID)
 );
 
+-- Seat Table (Seat reservations for trips)
 CREATE TABLE Seat
 (
   Number INT NOT NULL,
@@ -120,6 +132,7 @@ CREATE TABLE Seat
   UNIQUE (Number)
 );
 
+-- Canceled Reservation Table (for managing canceled reservations)
 CREATE TABLE Canceled_Reservation
 (
   Request_Date DATE NOT NULL,
@@ -128,6 +141,7 @@ CREATE TABLE Canceled_Reservation
   FOREIGN KEY (Reservation_ID) REFERENCES Reservation(Reservation_ID)
 );
 
+-- Under Processing Reservation Table (Reservations pending processing)
 CREATE TABLE Under_processing_Reservation
 (
   Expire_Date DATE NOT NULL,
@@ -136,6 +150,7 @@ CREATE TABLE Under_processing_Reservation
   FOREIGN KEY (Reservation_ID) REFERENCES Reservation(Reservation_ID)
 );
 
+-- Bill Table (for payment status and method)
 CREATE TABLE Bill
 (
   BStatus VARCHAR(1) NOT NULL,
@@ -146,6 +161,7 @@ CREATE TABLE Bill
   FOREIGN KEY (Reservation_ID) REFERENCES Reservation(Reservation_ID)
 );
 
+-- Carries Table (to associate luggage with reservations)
 CREATE TABLE Carries
 (
   Reservation_ID INT NOT NULL,
@@ -156,6 +172,7 @@ CREATE TABLE Carries
   FOREIGN KEY (TripNo) REFERENCES Trip(TripNo)
 );
 
+-- Creates Table (to link notifications with reservations)
 CREATE TABLE Creates
 (
   Reservation_ID INT NOT NULL,
@@ -164,6 +181,7 @@ CREATE TABLE Creates
   FOREIGN KEY (Notification_ID) REFERENCES Notification(Notification_ID)
 );
 
+-- Passenger Reservations Table (linking passengers to their reservations)
 CREATE TABLE PassengerReservations
 (
   National_ID INT NOT NULL,
@@ -171,3 +189,33 @@ CREATE TABLE PassengerReservations
   FOREIGN KEY (National_ID) REFERENCES Passenger(National_ID),
   FOREIGN KEY (Reservation_ID) REFERENCES Reservation(Reservation_ID)
 );
+
+-- Waitlisted Passengers Table (for passengers waiting for a ticket)
+CREATE TABLE WaitlistedPassenger
+(
+  National_ID INT NOT NULL,
+  Train_ID INT NOT NULL,
+  Seat_Class VARCHAR(20),
+  Status VARCHAR(10) NOT NULL, -- e.g., "pending", "promoted"
+  PRIMARY KEY (National_ID, Train_ID),
+  FOREIGN KEY (National_ID) REFERENCES Passenger(National_ID),
+  FOREIGN KEY (Train_ID) REFERENCES Train(Train_ID)
+);
+
+-- Average Load Factor View (Optional bonus: average occupancy per train on a given date)
+-- Separate CREATE VIEW in its own batch
+GO
+
+CREATE VIEW AverageLoadFactor AS
+SELECT
+    t.Train_ID,
+    COUNT(s.Number) * 1.0 / (SELECT COUNT(*) FROM Seat WHERE TripNo = s.TripNo) AS LoadFactor
+FROM
+    Train t
+JOIN
+    Trip trip ON t.Train_ID = trip.Train_ID
+JOIN
+    Seat s ON trip.TripNo = s.TripNo
+GROUP BY
+    t.Train_ID;
+

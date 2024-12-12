@@ -1,42 +1,47 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios";
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 
-function TrainSchedule() {
+const TrainSchedule = () => {
   const [trains, setTrains] = useState([]);
+  const [search, setSearch] = useState('');
+  const [selectedTrain, setSelectedTrain] = useState(null);
 
-  useEffect(() => {
-    axios.get("http://localhost:5000/api/trains")
-      .then((response) => setTrains(response.data))
-      .catch((error) => console.error("Error fetching data:", error));
-  }, []);
+  // Search Trains
+  const searchTrains = async () => {
+    const response = await axios.get(`/api/trains/search?name=${search}`);
+    setTrains(response.data);
+  };
+
+  // Book Seat
+  const bookSeat = async (train) => {
+    const user_id = 1; // Example user
+    const seat_number = Math.floor(Math.random() * 100);
+    const response = await axios.post('/api/reservations/book', { user_id, train_id: train.train_id, seat_number });
+    alert(response.data.message);
+  };
 
   return (
-    <section id="train-schedule" className="card">
-      <h2>Train Schedule</h2>
-      <table border="1" style={{ width: "100%", margin: "auto" }}>
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Name</th>
-            <th>Origin</th>
-            <th>Destination</th>
-            <th>Departure Time</th>
-          </tr>
-        </thead>
-        <tbody>
-          {trains.map((train) => (
-            <tr key={train.id}>
-              <td>{train.id}</td>
-              <td>{train.name}</td>
-              <td>{train.origin}</td>
-              <td>{train.destination}</td>
-              <td>{train.departure_time}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </section>
+    <div>
+      <h1>Search for Trains</h1>
+      <input
+        type="text"
+        placeholder="Train Name"
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+      />
+      <button onClick={searchTrains}>Search</button>
+
+      <ul>
+        {trains.map((train) => (
+          <li key={train.train_id}>
+            {train.name} - Seats Available: {train.seats_available}
+            <button onClick={() => bookSeat(train)}>Book Seat</button>
+          </li>
+        ))}
+      </ul>
+    </div>
   );
-}
+};
 
 export default TrainSchedule;
+
