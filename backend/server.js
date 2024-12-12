@@ -3,6 +3,10 @@ const mysql = require('mysql2');
 const bodyParser = require('body-parser');
 
 const app = express();
+const Lport = 5000;
+
+// Middleware
+app.use(cors());
 app.use(bodyParser.json());
 
 // Database connection
@@ -11,6 +15,32 @@ const db = mysql.createConnection({
   user: 'root',
   password: 'password', // Replace with your MySQL password
   database: 'train_reservation_system',
+  host: "localhost",
+  user: "user",
+  password: "",
+  database: "ics321",
+  port: 3306, // Explicitly specify the port
+});
+
+// Query
+app.get("/trips", (req, res) => {
+  const { date } = req.query; // Get the date from the query parameters
+  if (!date) {
+    return res.status(400).send({ error: "Date is required" });
+  }
+
+  const query = `SELECT * FROM Trip WHERE DATE = ?;`;
+
+  db.query(query, [date], (err, results) => {
+    if (err) {
+      console.error("Error fetching train schedule:", err);
+      res.status(500).send({ error: "Error fetching schedule" });
+    } else if (results.length === 0) {
+      res.json([]); // Send an empty array if no results are found
+    } else {
+      res.json(results); // Send the query results as JSON
+    }
+  });
 });
 
 db.connect((err) => {
@@ -75,4 +105,7 @@ app.get('/api/reports/load-factor', (req, res) => {
 const PORT = 5000;
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
+// Start Server
+app.listen(Lport, () => {
+  console.log(`Server is running on http://localhost:${Lport}`);
 });
