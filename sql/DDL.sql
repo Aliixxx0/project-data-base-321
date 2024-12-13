@@ -191,18 +191,6 @@ CREATE TABLE PassengerReservations
   FOREIGN KEY (Reservation_ID) REFERENCES Reservation(Reservation_ID)
 );
 
--- Waitlisted Passengers Table (for passengers waiting for a ticket)
-CREATE TABLE WaitlistedPassenger
-(
-  National_ID INT NOT NULL,
-  Train_ID INT NOT NULL,
-  Seat_Class VARCHAR(20),
-  Status VARCHAR(10) NOT NULL, -- e.g., "pending", "promoted"
-  PRIMARY KEY (National_ID, Train_ID),
-  FOREIGN KEY (National_ID) REFERENCES Passenger(National_ID),
-  FOREIGN KEY (Train_ID) REFERENCES Train(Train_ID)
-);
-
 -- Average Load Factor View (Optional bonus: average occupancy per train on a given date)
 -- Separate CREATE VIEW in its own batch
 GO
@@ -219,4 +207,3 @@ JOIN
     Seat s ON trip.TripNo = s.TripNo
 GROUP BY
     t.Train_ID;
-
