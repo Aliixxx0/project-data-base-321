@@ -6,7 +6,7 @@ function Login() {
   const navigate = useNavigate();
   const handleLogin = (event) => {
     event.preventDefault();
-    navigate("/Booking");
+    navigate("/passenger");
   };
 
   return (
