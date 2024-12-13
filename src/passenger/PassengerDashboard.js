@@ -1,9 +1,9 @@
+import { Link } from 'react-router-dom';
 import React, { useState, useEffect } from 'react';
 import { 
-  Train, Users, User, Calendar, Clock, CreditCard, 
+  Train, Users, User, Calendar, CreditCard, 
   List, Award, UserPlus, Package, AlertCircle 
 } from 'lucide-react';
-
 // Dashboard Layout Component
 const DashboardLayout = ({ children, userType = 'passenger' }) => {
   const [notifications, setNotifications] = useState([]);
@@ -74,7 +74,7 @@ const UserProfile = () => (
 const DashboardSidebar = ({ userType }) => (
   <div className="w-64 bg-white rounded-lg shadow-lg p-4">
     <nav className="space-y-2">
-      <SidebarLink icon={Train} text="Available Trains" />
+    <SidebarLink icon={Train} text="Search for Trips" to="/passenger/tripsearch" />
       <SidebarLink icon={Calendar} text="My Bookings" />
       <SidebarLink icon={Package} text="Luggage Status" />
       <SidebarLink icon={UserPlus} text="Family Members" />
@@ -184,12 +184,6 @@ const PassengerDashboard = () => {
           value="75,000"
           description="Silver Tier Member"
         />
-        <StatsCard
-          icon={CreditCard}
-          title="Available Credit"
-          value="SAR 500"
-          description="Refundable balance"
-        />
       </div>
 
       <div>
@@ -258,12 +252,12 @@ const StatsCard = ({ icon: Icon, title, value, description }) => (
 );
 
 // Sidebar Link Component (reused from your original code)
-const SidebarLink = ({ icon: Icon, text }) => (
-  <div className="flex items-center space-x-2 p-2 hover:bg-gray-100 rounded cursor-pointer">
-    <Icon className="w-5 h-5 text-blue-600" />
-    <span>{text}</span>
-  </div>
-);
+const SidebarLink = ({ icon: Icon, text, to }) => (
+  <Link to={to} className="flex items-center space-x-2 p-2 hover:bg-gray-100 rounded cursor-pointer">
+  <Icon className="w-5 h-5 text-blue-600" />
+  <span>{text}</span>
+  </Link>
+  );
 
 // Export the main component
 export default function Passenger() {

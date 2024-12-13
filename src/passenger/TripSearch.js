@@ -1,19 +1,37 @@
-import React, { useState, useEffect } from "react";
-import "./Booking.css";
+import React, { useState } from "react";
+import "./TripSearch.css";
 
 function Booking() {
   const [showTable, setShowTable] = useState(false);
   const [trips, setTrips] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [selectedDate, setSelectedDate] = useState("");
+
+  // Helper function to format date as yyyy/MM/dd
+  const formatDate = (date) => {
+    const selectedDate = new Date(date);
+    const year = selectedDate.getFullYear();
+    const month = String(selectedDate.getMonth() + 1).padStart(2, "0"); // Add leading zero
+    const day = String(selectedDate.getDate()).padStart(2, "0"); // Add leading zero
+    return `${year}/${month}/${day}`;
+  };
 
   // Fetch trips from the backend
-  const fetchTrips = async (date) => {
+  const fetchTrips = async (departingStation, destinationStation, selectedDate) => {
     setLoading(true);
     try {
-      const response = await fetch(`http://localhost:5000/trips?date=${date}`);
+      const formattedDate = formatDate(selectedDate); // Format the date
+      const response = await fetch(
+        `http://localhost:5000/trips?departing_station=${encodeURIComponent(
+          departingStation
+        )}&destination=${encodeURIComponent(destinationStation)}&date=${encodeURIComponent(
+          formattedDate
+        )}`
+      );
+      if (!response.ok) {
+        throw new Error("Failed to fetch trips");
+      }
       const data = await response.json();
-      setTrips(data);
+      setTrips(data); // Update trips with the response data
     } catch (error) {
       console.error("Error fetching trips:", error);
       setTrips([]);
@@ -23,8 +41,11 @@ function Booking() {
 
   const handleShowTable = (event) => {
     event.preventDefault();
+    const departingStation = document.getElementById("origin").value;
+    const destinationStation = document.getElementById("destination").value;
+    const selectedDate = document.getElementById("date").value;
     setShowTable(true);
-    fetchTrips(selectedDate); // Fetch trips using the selected date
+    fetchTrips(departingStation, destinationStation, selectedDate); // Fetch trips dynamically
   };
 
   const handleBuyTicket = (tripNo) => {
@@ -32,6 +53,9 @@ function Booking() {
     alert(`Ticket purchased for Trip# ${tripNo}`);
     // Add logic to send the tripNo to the backend
   };
+
+  // Get today's date in yyyy-MM-dd format for the date input
+  const today = new Date().toISOString().split("T")[0];
 
   return (
     <div className="booking-container">
@@ -42,20 +66,18 @@ function Booking() {
             <label htmlFor="origin">Origin Station:</label>
             <select id="origin" name="origin" required>
               <option value="">Select Origin</option>
-              <option value="dammam">Dammam</option>
-              <option value="ahsaa">Al Ahsa</option>
-              <option value="riyadh">Riyadh</option>
-              <option value="khobar">Khobar</option>
+              <option value="Station A">Station A</option>
+              <option value="Station B">Station B</option>
+              <option value="Station C">Station C</option>
             </select>
           </div>
           <div className="form-group">
             <label htmlFor="destination">Destination Station:</label>
             <select id="destination" name="destination" required>
               <option value="">Select Destination</option>
-              <option value="dammam">Dammam</option>
-              <option value="ahsaa">Al Ahsa</option>
-              <option value="riyadh">Riyadh</option>
-              <option value="khobar">Khobar</option>
+              <option value="Station A">Station A</option>
+              <option value="Station B">Station B</option>
+              <option value="Station C">Station C</option>
             </select>
           </div>
           <div className="form-group">
@@ -65,7 +87,7 @@ function Booking() {
               id="date"
               name="date"
               required
-              onChange={(e) => setSelectedDate(e.target.value)}
+              min={today} // Prevent selecting past dates
             />
           </div>
           <button type="submit" className="booking-button">Continue</button>
@@ -83,26 +105,24 @@ function Booking() {
                 <tr>
                   <th>Trip#</th>
                   <th>Train Name</th>
-                  <th>Origin</th>
-                  <th>Destination</th>
-                  <th>Time</th>
-                  <th>Date</th>
+                  <th>Departing Time</th>
+                  <th>Arrival Time</th>
+                  <th>Cost</th>
                   <th>Action</th>
                 </tr>
               </thead>
               <tbody>
                 {trips.map((trip) => (
-                  <tr key={trip.tripNo}>
-                    <td>{trip.tripNo}</td>
-                    <td>{trip.trainName}</td>
-                    <td>{trip.origin}</td>
-                    <td>{trip.destination}</td>
-                    <td>{trip.time}</td>
-                    <td>{trip.date}</td>
+                  <tr key={trip.TripNo}>
+                    <td>{trip.TripNo}</td>
+                    <td>{trip.English_Name}</td>
+                    <td>{trip.Departing_Time}</td>
+                    <td>{trip.Arrival_Time}</td>
+                    <td>{trip.Cost}</td>
                     <td>
                       <button
                         className="buy-ticket-button"
-                        onClick={() => handleBuyTicket(trip.tripNo)}
+                        onClick={() => handleBuyTicket(trip.TripNo)}
                       >
                         Buy Ticket
                       </button>
@@ -112,7 +132,7 @@ function Booking() {
               </tbody>
             </table>
           ) : (
-            <p className="no-trips-message">No trips available for the selected date.</p>
+            <p className="no-trips-message">No trips available.</p>
           )}
         </div>
       )}

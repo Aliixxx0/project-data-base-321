@@ -85,19 +85,7 @@ CREATE TABLE AssignedStaff
   FOREIGN KEY (National_ID) REFERENCES Staff(National_ID)
 );
 
-<<<<<<< HEAD
 -- Notification Table (System notifications)
-=======
-CREATE TABLE Sequence
-(
-  SequenceNo INT NOT NULL,
-  Train_ID INT NOT NULL,
-  TripNo INT NOT NULL,
-  FOREIGN KEY (Train_ID) REFERENCES Train(Train_ID),
-  FOREIGN KEY (TripNo) REFERENCES Trip(TripNo)
-);
-
->>>>>>> 1dfadb5d191496f40452c71a1286596b4d4beed2
 CREATE TABLE Notification
 (
   Notification_ID INT NOT NULL,

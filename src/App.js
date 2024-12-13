@@ -3,8 +3,8 @@ import { BrowserRouter as Router, Route, Routes, Link } from "react-router-dom";
 import "./App.css";
 import TrainImage from "./assets/train.webp"; // Import your train image
 import Login from "./Login";
-import Booking from "./passenger/Booking";
-import Passenger from "./passenger/Passenger"
+import TripSearch from "./passenger/TripSearch";
+import PassengerDashboard from "./passenger/PassengerDashboard"
 import StaffDashboard from "./staff/StaffDashboard"
 function App() {
   return (
@@ -37,10 +37,9 @@ function App() {
           />
 
           {/* Routes */}
-          {/* Add Login route */}
           <Route path="/login" element={<Login />} />
-          <Route path="/booking" element={<Booking/>}/>
-          <Route path="/passenger" element={<Passenger/>}/>
+          <Route path="/passenger/tripsearch" element={<TripSearch/>}/>
+          <Route path="/passenger" element={<PassengerDashboard/>}/>
           <Route path="/staffDashboard" element={<StaffDashboard/>}/>
           
         </Routes>
