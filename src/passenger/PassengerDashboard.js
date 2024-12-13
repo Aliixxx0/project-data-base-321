@@ -1,219 +1,164 @@
-import { Link } from 'react-router-dom';
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { 
   Train, Users, User, Calendar, CreditCard, 
-  List, Award, UserPlus, Package, AlertCircle 
+  UserPlus, LayoutDashboard
 } from 'lucide-react';
-// Dashboard Layout Component
-const DashboardLayout = ({ children, userType = 'passenger' }) => {
-  const [notifications, setNotifications] = useState([]);
-  const [loyaltyInfo, setLoyaltyInfo] = useState({
-    miles: 75000,
-    tier: 'Silver',
-    discount: 10
-  });
+
+const SidebarLink = ({ icon: Icon, text, isActive, onClick }) => (
+  <button
+    onClick={onClick}
+    className={`w-full flex items-center space-x-3 p-3 rounded-lg transition-colors duration-200
+      ${isActive 
+        ? 'bg-blue-600 text-white hover:bg-blue-700' 
+        : 'text-gray-300 hover:bg-gray-700'
+      }`}
+  >
+    <Icon className={`w-5 h-5 ${isActive ? 'text-white' : 'text-gray-300'}`} />
+    <span className="font-medium">{text}</span>
+  </button>
+);
+
+// Enhanced Dashboard Sidebar Component
+const DashboardSidebar = ({ userType = 'passenger', activePage, onPageChange }) => {
+  const navigation = [
+    { icon: LayoutDashboard, text: 'Dashboard' },
+    { icon: Train, text: 'Search for Trains' },
+    { icon: Calendar, text: 'My Bookings' },
+    { icon: UserPlus, text: 'Family Members' }
+  ];
+
+  const staffNavigation = [
+    { icon: Users, text: 'Manage Passengers' },
+    { icon: CreditCard, text: 'Process Refunds' }
+  ];
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <nav className="bg-blue-600 text-white p-4">
-        <div className="container mx-auto flex justify-between items-center">
-          <div className="flex items-center space-x-2">
-            <Train className="w-6 h-6" />
-            <span className="text-xl font-bold">Saudi Railways</span>
-            <span className="text-lg mr-4">قطار السعودية</span>
-          </div>
-          <div className="flex items-center space-x-4">
-            <LoyaltyBadge tier={loyaltyInfo.tier} miles={loyaltyInfo.miles} />
-            <NotificationBell count={notifications.length} />
-            <UserProfile />
-          </div>
-        </div>
+    <div className="w-64 bg-gray-800 rounded-lg shadow-lg p-4">
+      <nav className="space-y-2">
+        {navigation.map((item) => (
+          <SidebarLink
+            key={item.text}
+            icon={item.icon}
+            text={item.text}
+            isActive={activePage === item.text}
+            onClick={() => onPageChange(item.text)}
+          />
+        ))}
+        
+        {userType === 'staff' && (
+          <>
+            <div className="my-4 border-t border-gray-700" />
+            {staffNavigation.map((item) => (
+              <SidebarLink
+                key={item.text}
+                icon={item.icon}
+                text={item.text}
+                isActive={activePage === item.text}
+                onClick={() => onPageChange(item.text)}
+              />
+            ))}
+          </>
+        )}
       </nav>
-
-      <div className="container mx-auto p-4">
-        <div className="flex gap-4">
-          <DashboardSidebar userType={userType} />
-          <main className="flex-1 space-y-6">
-            {children}
-          </main>
-        </div>
-      </div>
     </div>
   );
 };
 
-// Loyalty Badge Component
-const LoyaltyBadge = ({ tier, miles }) => (
-  <div className="flex items-center bg-blue-700 rounded-full px-3 py-1">
-    <Award className="w-4 h-4 mr-2" />
-    <span className="text-sm">{tier} ({miles.toLocaleString()} miles)</span>
-  </div>
-);
-
-// Notification Bell Component
-const NotificationBell = ({ count }) => (
-  <div className="relative">
-    <div className="absolute -top-1 -right-1 bg-red-500 rounded-full w-4 h-4 text-xs flex items-center justify-center">
-      {count}
-    </div>
-    <AlertCircle className="w-5 h-5" />
-  </div>
-);
-
-// User Profile Component
-const UserProfile = () => (
-  <div className="flex items-center space-x-2">
-    <div className="w-8 h-8 bg-blue-700 rounded-full flex items-center justify-center">
-      <User className="w-5 h-5" />
-    </div>
-    <span>Abdullah</span>
-  </div>
-);
-
-// Dashboard Sidebar Component
-const DashboardSidebar = ({ userType }) => (
-  <div className="w-64 bg-white rounded-lg shadow-lg p-4">
-    <nav className="space-y-2">
-    <SidebarLink icon={Train} text="Search for Trips" to="/passenger/tripsearch" />
-      <SidebarLink icon={Calendar} text="My Bookings" />
-      <SidebarLink icon={Package} text="Luggage Status" />
-      <SidebarLink icon={UserPlus} text="Family Members" />
-      <SidebarLink icon={Award} text="Loyalty Program" />
-      <SidebarLink icon={List} text="Waiting List" />
-      {userType === 'staff' && (
-        <>
-          <SidebarLink icon={Users} text="Manage Passengers" />
-          <SidebarLink icon={CreditCard} text="Process Refunds" />
-        </>
-      )}
-    </nav>
-  </div>
-);
-
-// Booking Card Component
-const BookingCard = ({ booking }) => (
-  <div className="bg-white rounded-lg shadow p-4 hover:shadow-lg transition-shadow">
-    <div className="flex justify-between items-start">
+// Stats Card Component
+const StatsCard = ({ icon: Icon, title, value, description }) => (
+  <div className="bg-gray-800 p-6 rounded-lg shadow">
+    <div className="flex items-center justify-between">
       <div>
-        <h3 className="font-bold text-lg">{booking.trainName}</h3>
-        <p className="text-gray-600">{booking.trainNameAr}</p>
+        <p className="text-gray-400 text-sm">{title}</p>
+        <p className="text-2xl font-bold mt-1 text-white">{value}</p>
+        <p className="text-gray-500 text-sm mt-1">{description}</p>
       </div>
-      <span className={`px-2 py-1 rounded text-sm ${
-        booking.status === 'Confirmed' ? 'bg-green-100 text-green-800' :
-        booking.status === 'Waiting' ? 'bg-yellow-100 text-yellow-800' :
-        'bg-red-100 text-red-800'
-      }`}>
-        {booking.status}
-      </span>
-    </div>
-    <div className="mt-4 grid grid-cols-2 gap-4">
-      <div>
-        <p className="text-sm text-gray-500">From</p>
-        <p className="font-medium">{booking.from}</p>
-      </div>
-      <div>
-        <p className="text-sm text-gray-500">To</p>
-        <p className="font-medium">{booking.to}</p>
-      </div>
-      <div>
-        <p className="text-sm text-gray-500">Date</p>
-        <p className="font-medium">{booking.date}</p>
-      </div>
-      <div>
-        <p className="text-sm text-gray-500">Class</p>
-        <p className="font-medium">{booking.class}</p>
-      </div>
-    </div>
-    <div className="mt-4 flex justify-between items-center">
-      <div>
-        <p className="text-sm text-gray-500">Seat</p>
-        <p className="font-medium">{booking.seatNumber}</p>
-      </div>
-      <div>
-        <p className="text-sm text-gray-500">Price</p>
-        <p className="font-medium">SAR {booking.price}</p>
-      </div>
-      <button className="text-red-600 hover:text-red-800">
-        Cancel Booking
-      </button>
+      <Icon className="w-12 h-12 text-blue-500 opacity-75" />
     </div>
   </div>
 );
 
-// Passenger Dashboard Main Content
-const PassengerDashboard = () => {
-  const [activeBookings, setActiveBookings] = useState([
+// Dashboard Overview Component
+const DashboardOverview = ({ onPageChange }) => {
+  const quickStats = [
     {
-      id: 1,
-      trainName: 'HHR100',
-      trainNameAr: 'قطار الحرمين السريع',
-      status: 'Confirmed',
-      from: 'Riyadh',
-      to: 'Jeddah',
-      date: '2024-12-15',
-      class: 'Business',
-      seatNumber: '12A',
-      price: 450
+      icon: Train,
+      title: "Active Bookings",
+      value: "2",
+      description: "Current reservations"
     },
     {
-      id: 2,
-      trainName: 'DMM200',
-      trainNameAr: 'قطار الدمام',
-      status: 'Waiting',
-      from: 'Dammam',
-      to: 'Riyadh',
-      date: '2024-12-20',
-      class: 'Economy',
-      seatNumber: 'Pending',
-      price: 250
+      icon: Calendar,
+      title: "Upcoming Trips",
+      value: "3",
+      description: "Next 30 days"
     }
-  ]);
+  ];
 
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <StatsCard
-          icon={Train}
-          title="Active Bookings"
-          value={activeBookings.length}
-          description="Current reservations"
-        />
-        <StatsCard
-          icon={Award}
-          title="Loyalty Miles"
-          value="75,000"
-          description="Silver Tier Member"
-        />
+    <div className="space-y-8">
+      {/* Quick Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {quickStats.map((stat, index) => (
+          <StatsCard
+            key={index}
+            icon={stat.icon}
+            title={stat.title}
+            value={stat.value}
+            description={stat.description}
+          />
+        ))}
       </div>
 
-      <div>
-        <h2 className="text-xl font-bold mb-4">Your Bookings</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {activeBookings.map(booking => (
-            <BookingCard key={booking.id} booking={booking} />
-          ))}
+      {/* Recent Bookings Preview */}
+      <div className="bg-gray-800 rounded-lg shadow p-4">
+        <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xl font-bold text-white">Recent Bookings</h2>
+          <button 
+            onClick={() => onPageChange('My Bookings')}
+            className="text-blue-500 hover:text-blue-400"
+          >
+            View All
+          </button>
+        </div>
+        <div className="bg-gray-800 rounded-lg">
+          <div className="flex justify-between items-start">
+            <div>
+            <h3 className="font-bold text-white">HHR100 - Haramain Express</h3>
+              <p className="text-gray-400">Riyadh → Jeddah</p>
+              <p className="text-sm text-gray-500 mt-2">Dec 15, 2024</p>
+            </div>
+            <span className="bg-green-100 text-green-800 px-2 py-1 rounded text-sm">
+              Confirmed
+            </span>
+          </div>
         </div>
       </div>
 
-      <div>
-        <h2 className="text-xl font-bold mb-4">Family Members</h2>
-        <div className="bg-white rounded-lg shadow p-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <FamilyMemberCard
-              name="Sara Ahmed"
-              relation="Spouse"
-              discount={25}
-              id="1234567890"
-            />
-            <FamilyMemberCard
-              name="Youssef Ahmed"
-              relation="Child"
-              discount={25}
-              id="0987654321"
-            />
+      {/* Family Members Preview */}
+      <div className="bg-gray-800 rounded-lg shadow p-4">
+        <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xl font-bold text-white">Family Members</h2>
+          <button 
+            onClick={() => onPageChange('Family Members')}
+            className="text-blue-500 hover:text-blue-400"
+          >
+            Manage
+          </button>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="border border-gray-700 rounded-lg p-4">
+            <div className="flex justify-between items-start">
+              <div>
+                <h3 className="font-medium text-white">Sara Ahmed</h3>
+                <p className="text-sm text-gray-500">Spouse</p>
+              </div>
+              <span className="bg-green-100 text-green-800 px-2 py-1 rounded text-sm">
+                25% Discount
+              </span>
+            </div>
           </div>
-          <button className="mt-4 text-blue-600 hover:text-blue-800">
-            + Add Family Member
+          <button className="border border-gray-700 rounded-lg p-4 flex items-center justify-center text-blue-500 hover:text-blue-400 hover:bg-gray-700">            + Add Family Member
           </button>
         </div>
       </div>
@@ -221,49 +166,291 @@ const PassengerDashboard = () => {
   );
 };
 
-// Family Member Card Component
-const FamilyMemberCard = ({ name, relation, discount, id }) => (
-  <div className="border rounded-lg p-4">
-    <div className="flex justify-between items-start">
-      <div>
-        <h3 className="font-medium">{name}</h3>
-        <p className="text-sm text-gray-500">{relation}</p>
-        <p className="text-sm text-gray-500">ID: {id}</p>
-      </div>
-      <span className="bg-green-100 text-green-800 px-2 py-1 rounded text-sm">
-        {discount}% Discount
-      </span>
-    </div>
-  </div>
-);
+// Search Trains Component
+const SearchTrains = () => {
+  const [searchParams, setSearchParams] = useState({
+    from: '',
+    to: '',
+    date: ''
+  });
+  const [showResults, setShowResults] = useState(false);
+  const [trips, setTrips] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-// Stats Card Component (reused from your original code)
-const StatsCard = ({ icon: Icon, title, value, description }) => (
-  <div className="bg-white p-6 rounded-lg shadow">
-    <div className="flex items-center justify-between">
-      <div>
-        <p className="text-gray-500 text-sm">{title}</p>
-        <p className="text-2xl font-bold mt-1">{value}</p>
-        <p className="text-gray-600 text-sm mt-1">{description}</p>
-      </div>
-      <Icon className="w-12 h-12 text-blue-600 opacity-75" />
-    </div>
-  </div>
-);
+  // Helper function to format date as yyyy/MM/dd
+  const formatDate = (date) => {
+    const selectedDate = new Date(date);
+    const year = selectedDate.getFullYear();
+    const month = String(selectedDate.getMonth() + 1).padStart(2, "0");
+    const day = String(selectedDate.getDate()).padStart(2, "0");
+    return `${year}/${month}/${day}`;
+  };
 
-// Sidebar Link Component (reused from your original code)
-const SidebarLink = ({ icon: Icon, text, to }) => (
-  <Link to={to} className="flex items-center space-x-2 p-2 hover:bg-gray-100 rounded cursor-pointer">
-  <Icon className="w-5 h-5 text-blue-600" />
-  <span>{text}</span>
-  </Link>
-  );
+  // Get today's date in yyyy-MM-dd format for the date input
+  const today = new Date().toISOString().split("T")[0];
 
-// Export the main component
-export default function Passenger() {
+  // Fetch trips from the backend
+  const fetchTrips = async (departingStation, destinationStation, selectedDate) => {
+    setLoading(true);
+    try {
+      const formattedDate = formatDate(selectedDate);
+      const response = await fetch(
+        `http://localhost:5000/trips?departing_station=${encodeURIComponent(
+          departingStation
+        )}&destination=${encodeURIComponent(destinationStation)}&date=${encodeURIComponent(
+          formattedDate
+        )}`
+      );
+      if (!response.ok) {
+        throw new Error("Failed to fetch trips");
+      }
+      const data = await response.json();
+      setTrips(data);
+    } catch (error) {
+      console.error("Error fetching trips:", error);
+      setTrips([]);
+    }
+    setLoading(false);
+  };
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    setShowResults(true);
+    fetchTrips(searchParams.from, searchParams.to, searchParams.date);
+  };
+
+  const handleBuyTicket = (tripNo) => {
+    console.log(`Buying ticket for Trip# ${tripNo}`);
+    alert(`Ticket purchased for Trip# ${tripNo}`);
+  };
+
   return (
-    <DashboardLayout>
-      <PassengerDashboard />
-    </DashboardLayout>
+    <div className="space-y-6">
+      <h2 className="text-xl font-bold text-white">Search for Trains</h2>
+      
+      {/* Search Form */}
+      <div className="bg-gray-800 p-6 rounded-lg shadow">
+        <form onSubmit={handleSearch} className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="space-y-2">
+            <label className="block text-sm font-medium text-gray-300">From</label>
+              <select 
+                className="w-full p-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-white"                value={searchParams.from}
+                onChange={(e) => setSearchParams({...searchParams, from: e.target.value})}
+                required
+              >
+                <option value="">Select Station</option>
+                <option value="Station A">Station A</option>
+                <option value="Station B">Station B</option>
+                <option value="Station C">Station C</option>
+              </select>
+            </div>
+
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-700">To</label>
+              <select 
+                  className="w-full p-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-white"
+                value={searchParams.to}
+                onChange={(e) => setSearchParams({...searchParams, to: e.target.value})}
+                required
+              >
+                <option value="">Select Station</option>
+                <option value="Station A">Station A</option>
+                <option value="Station B">Station B</option>
+                <option value="Station C">Station C</option>
+              </select>
+            </div>
+
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-700">Date</label>
+              <input 
+                type="date"
+                className="w-full p-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-white"
+                value={searchParams.date}
+                onChange={(e) => setSearchParams({...searchParams, date: e.target.value})}
+                min={today}
+                required
+              />
+            </div>
+          </div>
+
+          <div className="flex justify-end">
+            <button 
+              type="submit"
+              className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              Search Trains
+            </button>
+          </div>
+        </form>
+      </div>
+
+      {/* Search Results */}
+      {showResults && (
+        <div className="bg-gray-800 rounded-lg shadow p-6">
+          <h3 className="text-lg font-semibold mb-4 text-white">Available Trips</h3>
+          {loading ? (
+            <div className="text-center py-8">
+              <p className="text-gray-400">Loading trips...</p>
+            </div>
+          ) : trips.length > 0 ? (
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-700">
+                  <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Trip#</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Train Name</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Departing Time</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Arrival Time</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Cost</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Action</th>
+                  </tr>
+                </thead>
+                <tbody className="bg-gray-800 divide-y divide-gray-700">
+                  {trips.map((trip) => (
+                    <tr key={trip.TripNo}>
+                      <td className="px-6 py-4 whitespace-nowrap text-gray-300">{trip.TripNo}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-gray-300">{trip.English_Name}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-gray-300">{trip.Departing_Time}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-gray-300">{trip.Arrival_Time}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-gray-300">{trip.Cost}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-gray-300">
+                        <button
+                          onClick={() => handleBuyTicket(trip.TripNo)}
+                          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                        >
+                          Book Now
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <div className="text-center py-8">
+              <p className="text-gray-400">No trips available for the selected route and date.</p>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
   );
+};
+
+// My Bookings Component
+const MyBookings = () => (
+  <div className="space-y-6">
+    <h2 className="text-xl font-bold text-white">My Bookings</h2>
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="bg-gray-800 p-4 rounded-lg shadow">
+        <div className="flex justify-between items-start">
+          <div>
+          <h3 className="font-bold text-white">HHR100 - Haramain Express</h3>
+            <p className="text-gray-400">Riyadh → Jeddah</p>
+            <p className="text-sm text-gray-500 mt-2">Dec 15, 2024</p>
+          </div>
+          <span className="bg-green-100 text-green-800 px-2 py-1 rounded text-sm">
+            Confirmed
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
+// Family Members Component
+const FamilyMembers = () => (
+  <div className="space-y-6">
+    <h2 className="text-xl font-bold text-white">Family Members</h2>
+    <div className="bg-gray-800 p-4 rounded-lg shadow">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="border border-gray-700 rounded-lg p-4">
+          <div className="flex justify-between items-start">
+            <div>
+              <h3 className="font-medium text-white">Sara Ahmed</h3>
+              <p className="text-sm text-gray-500">Spouse</p>
+              <p className="text-sm text-gray-500">ID: 1234567890</p>
+            </div>
+            <span className="bg-green-100 text-green-800 px-2 py-1 rounded text-sm">
+              25% Discount
+            </span>
+          </div>
+        </div>
+      </div>
+      <button className="mt-4 text-blue-500 hover:text-blue-400">
+        + Add Family Member
+      </button>
+    </div>
+  </div>
+);
+
+// Main Dashboard Component
+const PassengerDashboard = () => {
+  const [activePage, setActivePage] = useState('Dashboard');
+
+  const renderContent = () => {
+    switch (activePage) {
+      case 'Dashboard':
+        return <DashboardOverview onPageChange={setActivePage} />;
+      case 'Search for Trains':
+        return <SearchTrains />;
+      case 'My Bookings':
+        return <MyBookings />;
+      case 'Family Members':
+        return <FamilyMembers />;
+      default:
+        return <DashboardOverview onPageChange={setActivePage} />;
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-900">
+      <nav className="bg-gray-800 text-white p-4">
+        <div className="container mx-auto flex justify-between items-center">
+          <div className="flex items-center space-x-2">
+            <Train className="w-6 h-6" />
+            <span className="text-xl font-bold">Saudi Railways</span>
+          </div>
+          <div className="flex items-center space-x-4">
+            <UserProfile />
+          </div>
+        </div>
+      </nav>
+
+      <div className="container mx-auto p-4">
+        <div className="flex gap-4">
+          <DashboardSidebar 
+            activePage={activePage} 
+            onPageChange={setActivePage}
+          />
+          <main className="flex-1">
+            {renderContent()}
+          </main>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// User Profile Component
+const UserProfile = () => (
+  <div className="flex items-center space-x-4">
+    <div className="flex items-center space-x-2">
+      <div className="w-8 h-8 bg-blue-700 rounded-full flex items-center justify-center">
+        <User className="w-5 h-5" />
+      </div>
+      <span>Abdullah</span>
+    </div>
+    <button 
+      className="flex items-center space-x-2 px-3 py-1 bg-blue-700 hover:bg-blue-800 rounded-lg transition-colors duration-200"
+      onClick={() => console.log('Logout clicked')}
+    >
+      <span>Logout</span>
+    </button>
+  </div>
+);
+
+export default function PassengerApp() {
+  return <PassengerDashboard />;
 }
