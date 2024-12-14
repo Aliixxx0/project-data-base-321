@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect  } from 'react';
 import { Table, Eye, Edit, X, CheckCircle, AlertCircle, UserPlus, ArrowUpCircle } from 'lucide-react';
 
 // Custom Dialog Components
@@ -551,6 +551,9 @@ const NewTrainModal = ({ open, onClose }) => {
 
 // Train Management Component
 const TrainManagement = ({ onAssignStaff, onAddTrain }) => {
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [selectedTrain, setSelectedTrain] = useState(null);
+  
   const trains = [
     {
       id: 'HHR100',
@@ -625,8 +628,11 @@ const TrainManagement = ({ onAssignStaff, onAddTrain }) => {
                   <div className="flex space-x-2">
                     <ActionButton 
                       icon={Edit} 
-                      onClick={() => {}} 
-                      title="Edit Train"
+                      onClick={() => {
+                        setSelectedTrain(train);
+                        setShowEditModal(true);
+                      }}
+                      title="Edit Train" 
                     />
                     <ActionButton 
                       icon={UserPlus} 
@@ -645,6 +651,15 @@ const TrainManagement = ({ onAssignStaff, onAddTrain }) => {
           </tbody>
         </table>
       </div>
+
+      <EditTrainModal 
+        open={showEditModal}
+        onClose={() => {
+          setShowEditModal(false);
+          setSelectedTrain(null);
+        }}
+        train={selectedTrain}
+      />
     </div>
   );
 };
@@ -974,6 +989,133 @@ const Reports = () => {
 };
 
 // Modify StaffDashboard component to include Reports
+//edit tain button
+// Edit Train Modal Component
+const EditTrainModal = ({ open, onClose, train }) => {
+  const [formData, setFormData] = useState({
+    id: '',
+    nameEn: '',
+    nameAr: '',
+    capacity: '',
+    currentRoute: '',
+    status: ''
+  });
+
+  useEffect(() => {
+    if (train) {
+      setFormData({
+        id: train.id,
+        nameEn: train.nameEn,
+        nameAr: train.nameAr,
+        capacity: train.capacity,
+        currentRoute: train.currentRoute,
+        status: train.status
+      });
+    }
+  }, [train]);
+
+  const routes = [
+    'Makkah - Madinah',
+    'Riyadh - Dammam',
+    'Jeddah - Riyadh',
+    'Makkah - Jeddah',
+    'Riyadh - Qassim',
+    'Dammam - Riyadh',
+    'Madinah - Riyadh'
+  ];
+
+  const statuses = ['active', 'maintenance', 'inactive'];
+
+  return (
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Edit Train</DialogTitle>
+        </DialogHeader>
+        
+        <form onSubmit={(e) => {
+          e.preventDefault();
+          console.log('Updating train:', formData);
+          onClose();
+        }} className="space-y-4">
+          <div>
+            <Label htmlFor="trainId">Train ID</Label>
+            <Input
+              id="trainId"
+              value={formData.id}
+              onChange={(e) => setFormData({...formData, id: e.target.value})}
+              disabled
+            />
+          </div>
+          
+          <div>
+            <Label htmlFor="nameEn">Name (English)</Label>
+            <Input
+              id="nameEn"
+              value={formData.nameEn}
+              onChange={(e) => setFormData({...formData, nameEn: e.target.value})}
+            />
+          </div>
+          
+          <div>
+            <Label htmlFor="nameAr">Name (Arabic)</Label>
+            <Input
+              id="nameAr"
+              value={formData.nameAr}
+              onChange={(e) => setFormData({...formData, nameAr: e.target.value})}
+            />
+          </div>
+          
+          <div>
+            <Label htmlFor="capacity">Capacity</Label>
+            <Input
+              id="capacity"
+              type="number"
+              value={formData.capacity}
+              onChange={(e) => setFormData({...formData, capacity: e.target.value})}
+            />
+          </div>
+          
+          <div>
+            <Label htmlFor="route">Current Route</Label>
+            <Select
+              value={formData.currentRoute}
+              onValueChange={(value) => setFormData({...formData, currentRoute: value})}
+            >
+              <SelectItem value="">Select route</SelectItem>
+              {routes.map((route) => (
+                <SelectItem key={route} value={route}>{route}</SelectItem>
+              ))}
+            </Select>
+          </div>
+
+          <div>
+            <Label htmlFor="status">Status</Label>
+            <Select
+              value={formData.status}
+              onValueChange={(value) => setFormData({...formData, status: value})}
+            >
+              {statuses.map((status) => (
+                <SelectItem key={status} value={status}>
+                  {status.charAt(0).toUpperCase() + status.slice(1)}
+                </SelectItem>
+              ))}
+            </Select>
+          </div>
+          
+          <div className="flex justify-end space-x-2">
+            <Button variant="outline" onClick={onClose}>
+              Cancel
+            </Button>
+            <Button type="submit">
+              Save Changes
+            </Button>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+};
 
 
 export default StaffDashboard;
