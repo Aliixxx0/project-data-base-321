@@ -100,20 +100,25 @@ const TabButton = ({ active, onClick, text }) => (
 );
 
 const StatusBadge = ({ status }) => {
-  const styles = {
-    confirmed: 'bg-green-100 text-green-800',
-    pending: 'bg-yellow-100 text-yellow-800',
-    cancelled: 'bg-red-100 text-red-800',
-    active: 'bg-green-100 text-green-800',
-    inactive: 'bg-gray-100 text-gray-800'
+  const statusMap = {
+    C: { label: 'Confirmed', className: 'bg-green-100 text-green-800' },
+    U: { label: 'Under Preparation', className: 'bg-yellow-100 text-yellow-800' },
+    N: { label: 'Cancelled', className: 'bg-red-100 text-red-800' },
+    W: { label: 'Waitlisted', className: 'bg-blue-100 text-blue-800' },
+  };
+
+  const { label, className } = statusMap[status] || {
+    label: 'Unknown',
+    className: 'bg-gray-100 text-gray-800',
   };
 
   return (
-    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${styles[status] || 'bg-gray-100 text-gray-800'}`}>
-      {status.charAt(0).toUpperCase() + status.slice(1)}
+    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${className}`}>
+      {label}
     </span>
   );
 };
+
 
 const ActionButton = ({ icon: Icon, onClick, title }) => (
   <button
@@ -205,70 +210,97 @@ const StaffDashboard = () => {
 
 // Reservations List Component
 const ReservationsList = ({ onEdit }) => {
-  const reservations = [
-    {
-      id: 'RES001',
-      passenger: 'Ahmed Mohammed',
-      train: 'HHR100',
-      date: '2024-12-15',
-      status: 'confirmed',
-      from: 'Riyadh',
-      to: 'Jeddah'
-    }
-  ];
+  const [reservations, setReservations] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // Fetch data from backend
+  useEffect(() => {
+    const fetchReservations = async () => {
+      setIsLoading(true);
+      try {
+        const response = await fetch('http://localhost:5000/customerReservations'); // Update with the actual backend endpoint
+        const data = await response.json();
+        setReservations(data);
+      } catch (error) {
+        console.error('Error fetching reservations:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchReservations();
+  }, []);
+
+  // Filter reservations based on search query
+  const filteredReservations = reservations.filter((reservation) =>
+    reservation.passenger.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  // Format date function
+  const formatDate = (dateString) => {
+    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+    return new Date(dateString).toLocaleDateString(undefined, options);
+  };
 
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <h2 className="text-lg font-semibold">Current Reservations</h2>
         <div className="flex space-x-2">
-          <Button onClick={() => onEdit(null)}>
-            New Reservation
-          </Button>
+          <Button onClick={() => onEdit(null)}>New Reservation</Button>
           <Input
             type="text"
             placeholder="Search reservations..."
             className="px-4 py-2"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
       </div>
 
       <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">ID</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Passenger</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Train</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Route</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {reservations.map((reservation) => (
-              <tr key={reservation.id}>
-                <td className="px-6 py-4 whitespace-nowrap">{reservation.id}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{reservation.passenger}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{reservation.train}</td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  {reservation.from} → {reservation.to}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">{reservation.date}</td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <StatusBadge status={reservation.status} />
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="flex space-x-2">
-                    <ActionButton icon={Edit} onClick={() => onEdit(reservation)} title="Edit" />
-                    <ActionButton icon={X} onClick={() => {}} title="Cancel" />
-                  </div>
-                </td>
+        {isLoading ? (
+          <p>Loading reservations...</p>
+        ) : (
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">ID</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Passenger</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Train</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Departure</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Arrival</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Departure Time</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {filteredReservations.map((reservation) => (
+                <tr key={reservation.id}>
+                  <td className="px-6 py-4 whitespace-nowrap">{reservation.id}</td>
+                  <td className="px-6 py-4 whitespace-nowrap">{reservation.passenger}</td>
+                  <td className="px-6 py-4 whitespace-nowrap">{reservation.train}</td>
+                  <td className="px-6 py-4 whitespace-nowrap">{reservation.origin}</td>
+                  <td className="px-6 py-4 whitespace-nowrap">{reservation.destination}</td>
+                  <td className="px-6 py-4 whitespace-nowrap">{formatDate(reservation.date)}</td>
+                  <td className="px-6 py-4 whitespace-nowrap">{reservation.departing_time}</td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <StatusBadge status={reservation.status} />
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="flex space-x-2">
+                      <ActionButton icon={Edit} onClick={() => onEdit(reservation)} title="Edit" />
+                      <ActionButton icon={X} onClick={() => {}} title="Cancel" />
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </div>
     </div>
   );

@@ -6,6 +6,7 @@ import PassengerDashboard from "./passenger/PassengerDashboard";
 import Payment from "./passenger/Payment"
 import TrainImage from "./assets/train.webp";
 import BookingSuccess from "./passenger/BookingSuccess"
+import StaffDashboard from "./staff/StaffDashboard"
 // Homepage Component
 const Homepage = () => (
   <div className="min-h-screen bg-gray-900 flex flex-col">
@@ -110,7 +111,7 @@ function App() {
         <Route path="/passenger" element={<PassengerDashboard />} />
         <Route path="/pay" element={<Payment />} />
         <Route path="/success" element={<BookingSuccess />} />
-        
+        <Route path="/staffDashboard" element={<StaffDashboard />} />
       </Routes>
     </Router>
   );

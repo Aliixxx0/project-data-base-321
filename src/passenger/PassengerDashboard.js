@@ -5,7 +5,7 @@ import {
 } from 'lucide-react';
 import { useNavigate } from "react-router-dom";
 var nationalID = 101;
-
+var reqID = nationalID;
 const SidebarLink = ({ icon: Icon, text, isActive, onClick }) => (
   <button
     onClick={onClick}
@@ -80,16 +80,18 @@ const StatsCard = ({ icon: Icon, title, value, description }) => (
   </div>
 );
 
-const DashboardOverview = ({ onPageChange }) => {
-  const [activeTrains, setActiveTrains,upcomingTrips] = useState("...");
+const DashboardOverview = ({ onPageChange, nationalID }) => {
+  const [activeTrains, setActiveTrains] = useState("...");
+  const [upcomingTrips, setUpcomingTrips] = useState("...");
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingTrips, setIsLoadingTrips] = useState(true);
 
   useEffect(() => {
+    // Fetch active trains
     const fetchActiveTrains = async () => {
       try {
-        // Replace with your actual API endpoint
-        const response = await fetch('http://localhost:5000/active-trains');
-        const data = await response.json();
+        var response = await fetch('http://localhost:5000/active-trains');
+        var data = await response.json();
         setActiveTrains(data.activeTrains.toString());
       } catch (error) {
         console.error('Failed to fetch active trains:', error);
@@ -99,8 +101,24 @@ const DashboardOverview = ({ onPageChange }) => {
       }
     };
 
+    // Fetch upcoming trips
+    const fetchUpcomingTrips = async () => {
+      try {
+        const id = reqID;
+        var response = await fetch(`http://localhost:5000/confirmed-reservations?nationalID=${id}`);
+        var data = await response.json();
+        setUpcomingTrips(data.upcomingTrips.toString());
+      } catch (error) {
+        console.error('Failed to fetch upcoming trips:', error);
+        setUpcomingTrips("NaN"); // Fallback value
+      } finally {
+        setIsLoadingTrips(false);
+      }
+    };
+    
     fetchActiveTrains();
-  }, []);
+    fetchUpcomingTrips();
+  }, [nationalID]);
 
   const quickStats = [
     {
@@ -112,7 +130,7 @@ const DashboardOverview = ({ onPageChange }) => {
     {
       icon: Calendar,
       title: "Upcoming Trips",
-      value: "1",
+      value: isLoadingTrips ? "..." : upcomingTrips,
       description: "Current reservations"
     }
   ];
@@ -128,7 +146,7 @@ const DashboardOverview = ({ onPageChange }) => {
             title={stat.title}
             value={stat.value}
             description={stat.description}
-            isLoading={index === 0 ? isLoading : false}
+            isLoading={index === 0 ? isLoading : isLoadingTrips}
           />
         ))}
       </div>
@@ -138,7 +156,6 @@ const DashboardOverview = ({ onPageChange }) => {
     </div>
   );
 };
-
 
 // Search Trains Component
 const SearchTrains = () => {
@@ -325,7 +342,7 @@ const MyBookings = () => {
   useEffect(() => {
     const fetchBookings = async () => {
       try {
-        const response = await fetch(`http://localhost:5000/reservations?id=${nationalID}`);
+        const response = await fetch(`http://localhost:5000/reservations?id=${reqID}`);
         const data = await response.json();
         setBookings(data); // Store the backend data directly
       } catch (error) {
@@ -347,7 +364,10 @@ const MyBookings = () => {
             <div key={index} className="bg-gray-800 p-4 rounded-lg shadow">
               <div className="flex justify-between items-start">
                 <div>
-                  <h3 className="font-bold text-white">
+                  <p className="text-sm text-gray-500">
+                    <span className="font-medium">Reservation number:</span> {booking.Reservation_ID}
+                  </p>
+                  <h3 className="font-bold text-white mt-2">
                     Train - {booking.Train_Name}
                   </h3>
                   <p className="text-gray-400">
@@ -375,6 +395,7 @@ const MyBookings = () => {
     </div>
   );
 };
+
 
 
 // Family Members Component
@@ -476,22 +497,27 @@ const PassengerDashboard = () => {
 };
 
 // User Profile Component
-const UserProfile = () => (
-  <div className="flex items-center space-x-4">
-    <div className="flex items-center space-x-2">
-      <div className="w-8 h-8 bg-blue-700 rounded-full flex items-center justify-center">
-        <User className="w-5 h-5" />
+const UserProfile = () => {
+  const navigate = useNavigate(); // Correctly place the hook here
+
+  return (
+    <div className="flex items-center space-x-4">
+      <div className="flex items-center space-x-2">
+        <div className="w-8 h-8 bg-blue-700 rounded-full flex items-center justify-center">
+          <User className="w-5 h-5" />
+        </div>
+        <span>User</span>
       </div>
-      <span>User</span>
+      <button
+        className="flex items-center space-x-2 px-3 py-1 bg-blue-700 hover:bg-blue-800 rounded-lg transition-colors duration-200"
+        onClick={() => navigate("/")}
+      >
+        <span>Logout</span>
+      </button>
     </div>
-    <button 
-      className="flex items-center space-x-2 px-3 py-1 bg-blue-700 hover:bg-blue-800 rounded-lg transition-colors duration-200"
-      onClick={() => console.log('Logout clicked')}
-    >
-      <span>Logout</span>
-    </button>
-  </div>
-);
+  );
+};
+
 
 export default function PassengerApp() {
   return <PassengerDashboard />;
