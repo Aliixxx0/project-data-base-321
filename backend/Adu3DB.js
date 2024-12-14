@@ -44,13 +44,33 @@ app.get("/trips", (req, res) => {
 });
 
 app.get("/reservations", (req, res) => {
-  const { departing_station, destination, date } = req.query; // Extract query parameters
+  const { id } = req.query; // Extract query parameters
 
   // SQL Query with dynamic variables
-  const reservationsList = `SELECT Reservation_ID,`;
+  const reservationsList = `SELECT 
+    Train.English_Name AS Train_Name,
+    Reservation.RStatus AS Reservation_Status,
+    Departing_Station.Station_Name AS Origin,
+    Arrival_Station.Station_Name AS Destination,
+    Trip.TDate AS Departure_Date,
+    Trip.Departing_Time AS Departure_Time
+FROM 
+    PassengerReservations
+JOIN 
+    Reservation ON PassengerReservations.Reservation_ID = Reservation.Reservation_ID
+JOIN 
+    Trip ON Reservation.TripNo = Trip.TripNo
+JOIN 
+    Train ON Trip.Train_ID = Train.Train_ID
+JOIN 
+    Station AS Departing_Station ON Trip.Departing_Station = Departing_Station.Station_ID
+JOIN 
+    Station AS Arrival_Station ON Trip.Arrival_Station = Arrival_Station.Station_ID
+WHERE 
+    PassengerReservations.National_ID=?;`;
 
   // Execute query with parameterized inputs to prevent SQL injection
-  db.query(reservationsList, [departing_station, destination, date], (err, results) => {
+  db.query(reservationsList, [id], (err, results) => {
     if (err) {
       console.error("Database query failed:", err.message);
       return res.status(500).json({ error: "Database query failed" });
@@ -59,7 +79,22 @@ app.get("/reservations", (req, res) => {
   });
 });
 
-///////////////////////////////////////////////////////
+app.get("/dependent", (req, res) => {
+  const { id } = req.query; // Extract the userId from query parameters
+
+  // SQL Query with dynamic variables
+  const dependentList = `SELECT Name, Relationship FROM Dependent WHERE Guardian_ID=?;`;
+
+  // Execute query with parameterized input to prevent SQL injection
+  db.query(dependentList, [id], (err, results) => {
+    if (err) {
+      console.error("Database query failed:", err.message);
+      return res.status(500).json({ error: "Database query failed" });
+    }
+    res.status(200).json(results);
+  });
+});
+
 db.connect((err) => {
   if (err) throw err;
   console.log('Database Connected');

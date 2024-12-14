@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { 
   Train, Users, User, Calendar, CreditCard, 
   UserPlus, LayoutDashboard
 } from 'lucide-react';
-
+const nationalID = 101;
 const SidebarLink = ({ icon: Icon, text, isActive, onClick }) => (
   <button
     onClick={onClick}
@@ -86,17 +86,12 @@ const DashboardOverview = ({ onPageChange }) => {
       title: "Active Bookings",
       value: "2",
       description: "Current reservations"
-    },
-    {
-      icon: Calendar,
-      title: "Upcoming Trips",
-      value: "3",
-      description: "Next 30 days"
     }
   ];
 
   return (
     <div className="space-y-8">
+      <FamilyMembers onPageChange={onPageChange} />
       {/* Quick Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {quickStats.map((stat, index) => (
@@ -109,59 +104,7 @@ const DashboardOverview = ({ onPageChange }) => {
           />
         ))}
       </div>
-
-      {/* Recent Bookings Preview */}
-      <div className="bg-gray-800 rounded-lg shadow p-4">
-        <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-bold text-white">Recent Bookings</h2>
-          <button 
-            onClick={() => onPageChange('My Bookings')}
-            className="text-blue-500 hover:text-blue-400"
-          >
-            View All
-          </button>
-        </div>
-        <div className="bg-gray-800 rounded-lg">
-          <div className="flex justify-between items-start">
-            <div>
-            <h3 className="font-bold text-white">HHR100 - Haramain Express</h3>
-              <p className="text-gray-400">Riyadh → Jeddah</p>
-              <p className="text-sm text-gray-500 mt-2">Dec 15, 2024</p>
-            </div>
-            <span className="bg-green-100 text-green-800 px-2 py-1 rounded text-sm">
-              Confirmed
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* Family Members Preview */}
-      <div className="bg-gray-800 rounded-lg shadow p-4">
-        <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-bold text-white">Family Members</h2>
-          <button 
-            onClick={() => onPageChange('Family Members')}
-            className="text-blue-500 hover:text-blue-400"
-          >
-            Manage
-          </button>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="border border-gray-700 rounded-lg p-4">
-            <div className="flex justify-between items-start">
-              <div>
-                <h3 className="font-medium text-white">Sara Ahmed</h3>
-                <p className="text-sm text-gray-500">Spouse</p>
-              </div>
-              <span className="bg-green-100 text-green-800 px-2 py-1 rounded text-sm">
-                25% Discount
-              </span>
-            </div>
-          </div>
-          <button className="border border-gray-700 rounded-lg p-4 flex items-center justify-center text-blue-500 hover:text-blue-400 hover:bg-gray-700">            + Add Family Member
-          </button>
-        </div>
-      </div>
+      <MyBookings onPageChange={onPageChange} />
     </div>
   );
 };
@@ -339,51 +282,97 @@ const SearchTrains = () => {
 };
 
 // My Bookings Component
-const MyBookings = () => (
-  <div className="space-y-6">
-    <h2 className="text-xl font-bold text-white">My Bookings</h2>
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <div className="bg-gray-800 p-4 rounded-lg shadow">
-        <div className="flex justify-between items-start">
-          <div>
-          <h3 className="font-bold text-white">HHR100 - Haramain Express</h3>
-            <p className="text-gray-400">Riyadh → Jeddah</p>
-            <p className="text-sm text-gray-500 mt-2">Dec 15, 2024</p>
+const MyBookings = () => {
+  const [bookings, setBookings] = useState([]);
+  useEffect(() => {
+    const fetchBookings = async () => {
+      try {
+        const response = await fetch(`http://localhost:5000/reservations?id=${nationalID}`);
+        const data = await response.json();
+        setBookings(data);
+      } catch (error) {
+        console.error('Error fetching bookings:', error);
+      }
+    };
+
+    fetchBookings();
+  }, []);
+
+  return (
+    <div className="space-y-6">
+      <h2 className="text-xl font-bold text-white">My Bookings</h2>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {bookings.map((booking) => (
+          <div key={booking.id} className="bg-gray-800 p-4 rounded-lg shadow">
+            <div className="flex justify-between items-start">
+              <div>
+                <h3 className="font-bold text-white">{booking.trainNumber} - {booking.trainName}</h3>
+                <p className="text-gray-400">{booking.departingStation} → {booking.destinationStation}</p>
+                <p className="text-sm text-gray-500 mt-2">
+                  <span className="font-medium">Departure:</span> {booking.departureDate} - {booking.departureTime}
+                </p>
+              </div>
+              <span className="bg-green-100 text-green-800 px-2 py-1 rounded text-sm">
+                {booking.status}
+              </span>
+            </div>
           </div>
-          <span className="bg-green-100 text-green-800 px-2 py-1 rounded text-sm">
-            Confirmed
-          </span>
-        </div>
+        ))}
       </div>
     </div>
-  </div>
-);
+  );
+};
+
 
 // Family Members Component
-const FamilyMembers = () => (
-  <div className="space-y-6">
-    <h2 className="text-xl font-bold text-white">Family Members</h2>
-    <div className="bg-gray-800 p-4 rounded-lg shadow">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <div className="border border-gray-700 rounded-lg p-4">
-          <div className="flex justify-between items-start">
-            <div>
-              <h3 className="font-medium text-white">Sara Ahmed</h3>
-              <p className="text-sm text-gray-500">Spouse</p>
-              <p className="text-sm text-gray-500">ID: 1234567890</p>
-            </div>
-            <span className="bg-green-100 text-green-800 px-2 py-1 rounded text-sm">
-              25% Discount
-            </span>
-          </div>
-        </div>
+const FamilyMembers = ({ onPageChange }) => {
+  const [familyMembers, setFamilyMembers] = useState([]);
+  useEffect(() => {
+    const fetchFamilyMembers = async () => {
+      try {
+        const response = await fetch(`http://localhost:5000/dependent?id=${nationalID}`);
+        const data = await response.json();
+        setFamilyMembers(data);
+      } catch (error) {
+        console.error('Error fetching family members:', error);
+      }
+    };
+
+    fetchFamilyMembers();
+  }, []);
+
+  return (
+    <div className="bg-gray-800 rounded-lg shadow p-4">
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xl font-bold text-white">Family Members</h2>
+        <button
+          onClick={() => onPageChange('Family Members')}
+          className="text-blue-500 hover:text-blue-400"
+        >
+          Manage
+        </button>
       </div>
-      <button className="mt-4 text-blue-500 hover:text-blue-400">
-        + Add Family Member
-      </button>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {familyMembers.map((member, index) => (
+          <div key={index} className="border border-gray-700 rounded-lg p-4">
+            <div className="flex justify-between items-start">
+              <div>
+                <h3 className="font-medium text-white">{member.Name}</h3>
+                <p className="text-sm text-gray-500">{member.Relationship}</p>
+              </div>
+              <span className="bg-green-100 text-green-800 px-2 py-1 rounded text-sm">
+                25% Discount
+              </span>
+            </div>
+          </div>
+        ))}
+        <button className="border border-gray-700 rounded-lg p-4 flex items-center justify-center text-blue-500 hover:text-blue-400 hover:bg-gray-700">
+          + Add Family Member
+        </button>
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 // Main Dashboard Component
 const PassengerDashboard = () => {
@@ -452,5 +441,6 @@ const UserProfile = () => (
 );
 
 export default function PassengerApp() {
+  const userId=0;
   return <PassengerDashboard />;
 }
