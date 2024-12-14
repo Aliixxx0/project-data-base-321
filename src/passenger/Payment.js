@@ -140,7 +140,8 @@ const Payment = () => {
           } : null
         })
       });
-      const register = await fetch(`http://localhost:5000/reserve?id=${nationalID}?cost=${total}`);
+      const register = await fetch(`http://localhost:5000/reserve?id=${nationalID}&cost=${total}&tripNo=${tripNo}`
+);
       navigate('/success', {
         state: {
           tripNo,

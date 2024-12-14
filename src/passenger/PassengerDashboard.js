@@ -4,7 +4,8 @@ import {
   UserPlus, LayoutDashboard
 } from 'lucide-react';
 import { useNavigate } from "react-router-dom";
-const nationalID = 101;
+var nationalID = 101;
+
 const SidebarLink = ({ icon: Icon, text, isActive, onClick }) => (
   <button
     onClick={onClick}
@@ -79,20 +80,40 @@ const StatsCard = ({ icon: Icon, title, value, description }) => (
   </div>
 );
 
-// Dashboard Overview Component
 const DashboardOverview = ({ onPageChange }) => {
+  const [activeTrains, setActiveTrains,upcomingTrips] = useState("...");
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchActiveTrains = async () => {
+      try {
+        // Replace with your actual API endpoint
+        const response = await fetch('http://localhost:5000/active-trains');
+        const data = await response.json();
+        setActiveTrains(data.activeTrains.toString());
+      } catch (error) {
+        console.error('Failed to fetch active trains:', error);
+        setActiveTrains("NaN"); // Fallback value
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchActiveTrains();
+  }, []);
+
   const quickStats = [
     {
       icon: Train,
       title: "Active Trains",
-      value: "2",
-      description: "Current reservations"
+      value: isLoading ? "..." : activeTrains,
+      description: "Are in services"
     },
     {
       icon: Calendar,
       title: "Upcoming Trips",
-      value: "3",
-      description: "Next 30 days"
+      value: "1",
+      description: "Current reservations"
     }
   ];
 
@@ -107,16 +128,18 @@ const DashboardOverview = ({ onPageChange }) => {
             title={stat.title}
             value={stat.value}
             description={stat.description}
+            isLoading={index === 0 ? isLoading : false}
           />
         ))}
       </div>
       {/* Family Members Preview */}
       <MyBookings onPageChange={onPageChange} />
       <FamilyMembers onPageChange={onPageChange} />
-      
     </div>
   );
 };
+
+
 // Search Trains Component
 const SearchTrains = () => {
   const navigate = useNavigate();
@@ -197,9 +220,9 @@ const SearchTrains = () => {
                 required
               >
                 <option value="">Select Station</option>
-                <option value="Station A">Station A</option>
-                <option value="Station B">Station B</option>
-                <option value="Station C">Station C</option>
+                <option value="Dammam Station">Dammam Station</option>
+                <option value="Riyadh Station">Riyadh Station</option>
+                <option value="Jeddah Station">Jeddah Station</option>
               </select>
             </div>
 
@@ -212,9 +235,9 @@ const SearchTrains = () => {
                 required
               >
                 <option value="">Select Station</option>
-                <option value="Station A">Station A</option>
-                <option value="Station B">Station B</option>
-                <option value="Station C">Station C</option>
+                <option value="Dammam Station">Dammam Station</option>
+                <option value="Riyadh Station">Riyadh Station</option>
+                <option value="Jeddah Station">Jeddah Station</option>
               </select>
             </div>
 
@@ -304,7 +327,7 @@ const MyBookings = () => {
       try {
         const response = await fetch(`http://localhost:5000/reservations?id=${nationalID}`);
         const data = await response.json();
-        setBookings(data);
+        setBookings(data); // Store the backend data directly
       } catch (error) {
         console.error("Error fetching bookings:", error);
       }
@@ -320,23 +343,29 @@ const MyBookings = () => {
         <p className="text-gray-400 text-center">You don't have any bookings yet.</p>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {bookings.map((booking) => (
-            <div key={booking.id} className="bg-gray-800 p-4 rounded-lg shadow">
+          {bookings.map((booking, index) => (
+            <div key={index} className="bg-gray-800 p-4 rounded-lg shadow">
               <div className="flex justify-between items-start">
                 <div>
                   <h3 className="font-bold text-white">
-                    {booking.trainNumber} - {booking.trainName}
+                    Train - {booking.Train_Name}
                   </h3>
                   <p className="text-gray-400">
-                    {booking.departingStation} → {booking.destinationStation}
+                    {booking.Origin} → {booking.Destination}
                   </p>
                   <p className="text-sm text-gray-500 mt-2">
                     <span className="font-medium">Departure:</span>{" "}
-                    {booking.departureDate} - {booking.departureTime}
+                    {new Date(booking.Departure_Date).toLocaleDateString()} - {booking.Departure_Time}
                   </p>
                 </div>
-                <span className="bg-green-100 text-green-800 px-2 py-1 rounded text-sm">
-                  {booking.status}
+                <span
+                  className={`px-2 py-1 rounded text-sm ${
+                    booking.Reservation_Status === "C"
+                      ? "bg-green-100 text-green-800"
+                      : "bg-yellow-100 text-yellow-800"
+                  }`}
+                >
+                  {booking.Reservation_Status === "C" ? "Confirmed" : "Unconfirmed"}
                 </span>
               </div>
             </div>
@@ -346,6 +375,7 @@ const MyBookings = () => {
     </div>
   );
 };
+
 
 // Family Members Component
 const FamilyMembers = ({ onPageChange }) => {
@@ -452,7 +482,7 @@ const UserProfile = () => (
       <div className="w-8 h-8 bg-blue-700 rounded-full flex items-center justify-center">
         <User className="w-5 h-5" />
       </div>
-      <span>Abdullah</span>
+      <span>User</span>
     </div>
     <button 
       className="flex items-center space-x-2 px-3 py-1 bg-blue-700 hover:bg-blue-800 rounded-lg transition-colors duration-200"
