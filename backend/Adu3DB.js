@@ -4,7 +4,8 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const app = express();
 const Lport = 5000;
-
+var reserveNo=100;
+var billNo=300;
 // Middleware
 app.use(cors());
 app.use(bodyParser.json());
@@ -19,6 +20,22 @@ const db = mysql.createConnection({
 });
 
 // Queries Passenger
+app.get("/tripCost", (req, res) => {
+  const { tripNo } = req.query; // Extract query parameters
+
+  // SQL Query with dynamic variables
+  const tripC = `SELECT Cost FROM Trip WHERE TripNo=?;`;
+
+  // Execute query with parameterized inputs to prevent SQL injection
+  db.query(tripC, [tripNo], (err, results) => {
+    if (err) {
+      console.error("Database query failed:", err.message);
+      return res.status(500).json({ error: "Database query failed" });
+    }
+    res.status(200).json(results);
+  });
+});
+
 app.get("/trips", (req, res) => {
   const { departing_station, destination, date } = req.query; // Extract query parameters
 
@@ -87,6 +104,32 @@ app.get("/dependent", (req, res) => {
 
   // Execute query with parameterized input to prevent SQL injection
   db.query(dependentList, [id], (err, results) => {
+    if (err) {
+      console.error("Database query failed:", err.message);
+      return res.status(500).json({ error: "Database query failed" });
+    }
+    res.status(200).json(results);
+  });
+});
+
+app.get("/reserve", (req, res) => {
+  const { tripNo,id } = req.query; // Extract the userId from query parameters
+  reserveNo++;
+  // SQL Query with dynamic variables
+  var reserve = `INSERT INTO Reservation (Reservation_ID, Reserve_Date, Cost, RStatus, TripNo, Managed_By)
+  VALUES (${reserveNo},CURRENT_DATE,? ,'U',301);`;
+
+  // Execute query with parameterized input to prevent SQL injection
+  db.query(reserve, [tripNo], (err, results) => {
+    if (err) {
+      console.error("Database query failed:", err.message);
+      return res.status(500).json({ error: "Database query failed" });
+    }
+    res.status(200).json(results);
+  });
+  
+  reserve = `INSERT INTO PassengerReservations (National_ID, Reservation_ID) VALUES (?,?)`
+  db.query(reserve, [id,tripNo], (err, results) => {
     if (err) {
       console.error("Database query failed:", err.message);
       return res.status(500).json({ error: "Database query failed" });

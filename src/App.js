@@ -2,10 +2,10 @@ import React from "react";
 import { BrowserRouter as Router, Route, Routes, Link } from "react-router-dom";
 import { Train, Calendar, User } from 'lucide-react';
 import Login from "./Login";
-import TripSearch from "./passenger/TripSearch";
 import PassengerDashboard from "./passenger/PassengerDashboard";
-import StaffDashboard from "./staff/StaffDashboard";
+import Payment from "./passenger/Payment"
 import TrainImage from "./assets/train.webp";
+import BookingSuccess from "./passenger/BookingSuccess"
 // Homepage Component
 const Homepage = () => (
   <div className="min-h-screen bg-gray-900 flex flex-col">
@@ -62,13 +62,6 @@ const Homepage = () => (
             <User className="w-5 h-5" />
             <span>Login to Your Account</span>
           </Link>
-          <Link 
-            to="/trips-schedule" 
-            className="flex items-center justify-center space-x-2 px-8 py-3 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors"
-          >
-            <Calendar className="w-5 h-5" />
-            <span>View Train Schedule</span>
-          </Link>
         </div>
 
         {/* Features Grid */}
@@ -114,9 +107,10 @@ function App() {
       <Routes>
         <Route path="/" element={<Homepage />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/passenger/tripsearch" element={<TripSearch />} />
         <Route path="/passenger" element={<PassengerDashboard />} />
-        <Route path="/staffDashboard" element={<StaffDashboard />} />
+        <Route path="/pay" element={<Payment />} />
+        <Route path="/success" element={<BookingSuccess />} />
+        
       </Routes>
     </Router>
   );

@@ -3,6 +3,7 @@ import {
   Train, Users, User, Calendar, CreditCard, 
   UserPlus, LayoutDashboard
 } from 'lucide-react';
+import { useNavigate } from "react-router-dom";
 const nationalID = 101;
 const SidebarLink = ({ icon: Icon, text, isActive, onClick }) => (
   <button
@@ -83,15 +84,20 @@ const DashboardOverview = ({ onPageChange }) => {
   const quickStats = [
     {
       icon: Train,
-      title: "Active Bookings",
+      title: "Active Trains",
       value: "2",
       description: "Current reservations"
+    },
+    {
+      icon: Calendar,
+      title: "Upcoming Trips",
+      value: "3",
+      description: "Next 30 days"
     }
   ];
 
   return (
     <div className="space-y-8">
-      <FamilyMembers onPageChange={onPageChange} />
       {/* Quick Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {quickStats.map((stat, index) => (
@@ -104,13 +110,16 @@ const DashboardOverview = ({ onPageChange }) => {
           />
         ))}
       </div>
+      {/* Family Members Preview */}
       <MyBookings onPageChange={onPageChange} />
+      <FamilyMembers onPageChange={onPageChange} />
+      
     </div>
   );
 };
-
 // Search Trains Component
 const SearchTrains = () => {
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useState({
     from: '',
     to: '',
@@ -164,7 +173,12 @@ const SearchTrains = () => {
 
   const handleBuyTicket = (tripNo) => {
     console.log(`Buying ticket for Trip# ${tripNo}`);
-    alert(`Ticket purchased for Trip# ${tripNo}`);
+    navigate('/pay', {
+      state: {
+        tripNo: tripNo,    // Replace with actual trip number
+        nationalID: nationalID  // Replace with actual national ID
+      }
+    });
   };
 
   return (
@@ -284,6 +298,7 @@ const SearchTrains = () => {
 // My Bookings Component
 const MyBookings = () => {
   const [bookings, setBookings] = useState([]);
+
   useEffect(() => {
     const fetchBookings = async () => {
       try {
@@ -291,7 +306,7 @@ const MyBookings = () => {
         const data = await response.json();
         setBookings(data);
       } catch (error) {
-        console.error('Error fetching bookings:', error);
+        console.error("Error fetching bookings:", error);
       }
     };
 
@@ -301,28 +316,36 @@ const MyBookings = () => {
   return (
     <div className="space-y-6">
       <h2 className="text-xl font-bold text-white">My Bookings</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {bookings.map((booking) => (
-          <div key={booking.id} className="bg-gray-800 p-4 rounded-lg shadow">
-            <div className="flex justify-between items-start">
-              <div>
-                <h3 className="font-bold text-white">{booking.trainNumber} - {booking.trainName}</h3>
-                <p className="text-gray-400">{booking.departingStation} → {booking.destinationStation}</p>
-                <p className="text-sm text-gray-500 mt-2">
-                  <span className="font-medium">Departure:</span> {booking.departureDate} - {booking.departureTime}
-                </p>
+      {bookings.length === 0 ? (
+        <p className="text-gray-400 text-center">You don't have any bookings yet.</p>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {bookings.map((booking) => (
+            <div key={booking.id} className="bg-gray-800 p-4 rounded-lg shadow">
+              <div className="flex justify-between items-start">
+                <div>
+                  <h3 className="font-bold text-white">
+                    {booking.trainNumber} - {booking.trainName}
+                  </h3>
+                  <p className="text-gray-400">
+                    {booking.departingStation} → {booking.destinationStation}
+                  </p>
+                  <p className="text-sm text-gray-500 mt-2">
+                    <span className="font-medium">Departure:</span>{" "}
+                    {booking.departureDate} - {booking.departureTime}
+                  </p>
+                </div>
+                <span className="bg-green-100 text-green-800 px-2 py-1 rounded text-sm">
+                  {booking.status}
+                </span>
               </div>
-              <span className="bg-green-100 text-green-800 px-2 py-1 rounded text-sm">
-                {booking.status}
-              </span>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
-
 
 // Family Members Component
 const FamilyMembers = ({ onPageChange }) => {
@@ -441,6 +464,5 @@ const UserProfile = () => (
 );
 
 export default function PassengerApp() {
-  const userId=0;
   return <PassengerDashboard />;
 }

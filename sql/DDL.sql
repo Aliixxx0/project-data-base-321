@@ -90,7 +90,7 @@ CREATE TABLE Notification
 (
   Notification_ID INT NOT NULL,
   Type VARCHAR(1) NOT NULL,
-  NDate INT NOT NULL,
+  NDate DATE NOT NULL,
   SysID VARCHAR(2) NOT NULL,
   PRIMARY KEY (Notification_ID),
   FOREIGN KEY (SysID) REFERENCES ESystem(SysID)
@@ -102,7 +102,6 @@ CREATE TABLE Reservation
   Reservation_ID INT NOT NULL,
   Reserve_Date DATE NOT NULL,
   Total_Cost FLOAT NOT NULL,
-  ID_Documents BLOB NOT NULL,
   RStatus VARCHAR(1) NOT NULL,
   TripNo INT NOT NULL,
   Managed_By INT NOT NULL,
@@ -114,8 +113,8 @@ CREATE TABLE Reservation
 -- Dependent Table (Passengers traveling with dependents)
 CREATE TABLE Dependent
 (
-  Name INT NOT NULL,
-  Relationship INT NOT NULL,
+  Name VARCHAR(30) NOT NULL,
+  Relationship VARCHAR(20) NOT NULL,
   Guardian_ID INT NOT NULL,
   FOREIGN KEY (Guardian_ID) REFERENCES Passenger(National_ID)
 );
@@ -155,7 +154,7 @@ CREATE TABLE Under_processing_Reservation
 CREATE TABLE Bill
 (
   BStatus VARCHAR(1) NOT NULL,
-  Method INT NOT NULL,
+  Method VARCHAR(30) NOT NULL,
   Number INT NOT NULL,
   Reservation_ID INT NOT NULL,
   PRIMARY KEY (Number),
@@ -193,8 +192,6 @@ CREATE TABLE PassengerReservations
 
 -- Average Load Factor View (Optional bonus: average occupancy per train on a given date)
 -- Separate CREATE VIEW in its own batch
-GO
-
 CREATE VIEW AverageLoadFactor AS
 SELECT
     t.Train_ID,

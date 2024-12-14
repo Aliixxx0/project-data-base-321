@@ -10,7 +10,7 @@ INSERT INTO Luggage (Luggage_ID, Weight, Dimensions, Luggage_Fee) VALUES
 (9, 25, 300, 60),
 (10, 22, 220, 55);
 INSERT INTO ESystem (System_Name, SysID) VALUES
-('Saudi Railways System', 'SR'),
+('Saudi Railways System','SR'),
 ('Makkah Reservation System', 'MR'),
 ('Riyadh Online Booking', 'RO');
 INSERT INTO Staff (National_ID, Fname, Lname, DOB, Phone) VALUES
@@ -25,20 +25,20 @@ INSERT INTO Staff (National_ID, Fname, Lname, DOB, Phone) VALUES
 (309, 'Said', 'Al-Sultan', '1987-12-25', '501122333'),
 (310, 'Najla', 'Al-Jubair', '1990-03-13', '502345678');
 INSERT INTO Train (Train_ID, Arabic_Name, English_Name) VALUES
-(501, 'قطار الشمال', 'Qitar Al-Shamal'),
-(502, 'قطار الجنوب', 'Qitar Al-Janub'),
-(503, 'قطار المدينة', 'Qitar Al-Madina'),
-(504, 'قطار الرياض', 'Qitar Al-Riyadh'),
-(505, 'قطار مكة', 'Qitar Makkah'),
-(506, 'قطار الدمام', 'Qitar Al-Dammam'),
-(507, 'قطار الخبر', 'Qitar Al-Khobar'),
-(508, 'قطار الطائف', 'Qitar Al-Taif'),
-(509, 'قطار جدة', 'Qitar Jeddah'),
-(510, 'قطار القصيم', 'Qitar Al-Qassim');
+(501, 'Qitar Al-Shamal', 'Train of the North'),
+(502, 'Qitar Al-Janub', 'Train of the South'),
+(503, 'Qitar Al-Madina', 'Train of the City'),
+(504, 'Qitar Al-Riyadh', 'Train of Riyadh'),
+(505, 'Qitar Makkah', 'Train of Makkah'),
+(506, 'Qitar Al-Dammam', 'Train of Dammam'),
+(507, 'Qitar Al-Khobar', 'Train of Khobar'),
+(508, 'Qitar Al-Taif', 'Train of Taif'),
+(509, 'Qitar Jeddah', 'Train of Jeddah'),
+(510, 'Qitar Al-Qassim', 'Train of Qassim');
 INSERT INTO Station (Station_ID, Station_Name, City) VALUES
 (1, 'Riyadh Station', 'Riyadh'),
 (2, 'Jeddah Station', 'Jeddah'),
-(3, 'Dammam Station', 'Dammam'), 
+(3, 'Dammam Station', 'Dammam');
 INSERT INTO Passenger (National_ID, Phone, Fname, Lname, DOB) VALUES
 (101, '501234567', 'Adel', 'Al-Zahrani', '1985-03-25'),
 (102, '502345678', 'Sarah', 'Al-Shehri', '1990-06-10'),
@@ -73,11 +73,23 @@ INSERT INTO AssignedStaff (Assiging_Date, Train_ID, National_ID) VALUES
 ('2024-12-19', 509, 309),
 ('2024-12-20', 510, 310);
 INSERT INTO Notification (Notification_ID, Type, NDate, SysID) VALUES
-(1, 'R', '2024-12-10', 1),
-(2, 'R', '2024-12-11', 1),
-(3, 'N', '2024-12-12', 2),
-(4, 'N', '2024-12-13', 2);
-INSERT INTO Reservation (Reservation_ID, Reserve_Date, Cost, RStatus, TripNo, Managed_By) VALUES
+(5, 'R', '2024-12-14', 'SR'),
+(6, 'R', '2024-12-15', 'SR'),
+(7, 'N', '2024-12-16', 'MR'),
+(8, 'N', '2024-12-17', 'MR'),
+(9, 'R', '2024-12-18', 'RO'),
+(10, 'R', '2024-12-19', 'RO');
+INSERT INTO Trip (TripNo, Train_ID, TDate, Departing_Time, Arrival_Time, Departing_Station, Arrival_Station, Duration, Miles, Cost) VALUES
+(1, 501, '2024-12-14', '10:00:00', '14:00:00', 1, 2, 3, 300, 120),
+(2, 502, '2024-12-14', '15:00:00', '20:00:00', 3, 1, 4, 600, 100),
+(3, 503, '2024-12-15', '06:00:00', '09:00:00', 2, 1, 3, 300, 90),
+(4, 504, '2024-12-16', '16:00:00', '20:00:00', 1, 2, 3, 300, 150),
+(5, 505, '2024-12-16', '08:00:00', '11:00:00', 2, 3, 3, 300, 110),
+(6, 506, '2024-12-16', '14:00:00', '18:00:00', 3, 1, 8, 600, 170),
+(7, 507, '2024-12-17', '09:00:00', '13:00:00', 2, 3, 5, 300, 105),
+(8, 508, '2024-12-17', '10:00:00', '14:00:00', 3, 2, 5, 300, 115); 
+
+INSERT INTO Reservation (Reservation_ID, Reserve_Date, Total_Cost, RStatus, TripNo, Managed_By) VALUES
 (201, '2024-12-01', 120, 'C', 1, 301),
 (202, '2024-12-02', 100, 'W', 2, 302),
 (203, '2024-12-03', 90, 'N', 3, 303),
@@ -89,24 +101,24 @@ INSERT INTO Reservation (Reservation_ID, Reserve_Date, Cost, RStatus, TripNo, Ma
 (209, '2024-12-09', 100, 'N', 2, 302),
 (210, '2024-12-10', 90, 'C', 3, 303);
 INSERT INTO Seat (Number, Class, Reservation_ID, TripNo) VALUES
-(1, 'Business', 201, 1),
-(2, 'Business', 202, 2),
-(3, 'Business', 203, 3),
-(4, 'Business', 204, 4),
-(5, 'Economy', 205, 5),
-(6, 'Economy', 206, 6),
-(7, 'Economy', 207, 7),
-(8, 'Economy', 208, 1),
-(9, 'Economy', 209, 2),
-(10, 'Economy', 210, 3);
+(1, 1, 201, 1),
+(2, 1, 202, 2),
+(3, 1, 203, 3),
+(4, 1, 204, 4),
+(5, 1, 205, 5),
+(6, 1, 206, 6),
+(7, 0, 207, 7),
+(8, 0, 208, 1),
+(9, 0, 209, 2),
+(10, 0, 210, 3);
 INSERT INTO Canceled_Reservation (Request_Date, Reservation_ID) VALUES
 ('2024-12-03', 203),
 ('2024-12-09', 209);
-INSERT INTO Under_processing_Reservation (Expire_Date, Reservation_ID) VALUES
-('2024-12-14', 202),
-('2024-12-15', 204),
-('2024-12-14', 206),
-('2024-12-16', 208);
+INSERT INTO Under_processing_Reservation (Expire_Date, Reservation_ID, Expire_Time) VALUES
+('2024-12-14', 202, '18:00:00'),
+('2024-12-15', 204, '18:00:00'),
+('2024-12-14', 206, '18:00:00'),
+('2024-12-16', 208, '18:00:00');
 INSERT INTO Bill (BStatus, Method, Number, Reservation_ID) VALUES
 ('P', 'Credit Card', 1, 201),
 ('U', 'Cash', 2, 202),
@@ -129,7 +141,6 @@ INSERT INTO Creates (Reservation_ID, Notification_ID) VALUES
 (208, 8),
 (209, 9),
 (210, 10);
-xNéon — Today at 3:06 AM
 INSERT INTO PassengerReservations (National_ID, Reservation_ID) VALUES
 (101, 201),
 (102, 202),
@@ -141,15 +152,6 @@ INSERT INTO PassengerReservations (National_ID, Reservation_ID) VALUES
 (108, 208),
 (109, 209),
 (110, 210);
-INSERT INTO Trip (TripNo, Train_ID, TDate, Departing_Time, Arrival_Time, Departing_Station, Arrival_Station, Duration, Miles, Cost) VALUES
-(1, 501, '2024-12-14', '10:00:00', '14:00:00', 1, 2, 3, 400, 120),
-(2, 502, '2024-12-14', '15:00:00', '20:00:00', 3, 4, 4, 350, 100),
-(3, 503, '2024-12-15', '06:00:00', '09:00:00', 4, 5, 3, 350, 90),
-(4, 504, '2024-12-16', '16:00:00', '20:00:00', 2, 1, 3, 400, 150),
-(5, 505, '2024-12-16', '08:00:00', '11:00:00', 5, 4, 3, 350, 110),
-(6, 506, '2024-12-16', '14:00:00', '18:00:00', 1, 3, 8, 900, 170),
-(7, 507, '2024-12-17', '09:00:00', '13:00:00', 3, 2, 5, 500, 105),
-(8, 508, '2024-12-17', '10:00:00', '14:00:00', 2, 3, 5, 500, 115);
 INSERT INTO Carries (Reservation_ID, Luggage_ID, TripNo) VALUES
 (201, 1, 1),
 (202, 2, 2),
@@ -161,7 +163,3 @@ INSERT INTO Carries (Reservation_ID, Luggage_ID, TripNo) VALUES
 (208, 8, 1),
 (209, 9, 2),
 (210, 10, 3);
-SELECT COUNT(*) AS Confirmed_Reservations
-FROM PassengerReservations PR
-JOIN Reservation R ON PR.Reservation_ID = R.Reservation_ID
-WHERE PR.National_ID = <Your_National_ID> AND R.RStatus = 'Confirmed';
